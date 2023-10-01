@@ -3,7 +3,7 @@ from gpiozero import Button
 from signal import pause
 import sounddevice as sd
 import os
-import wavio
+import wave
 import numpy as np
 
 # Make sure that the 'waves' folder exists, and if it does not, create it
@@ -51,7 +51,12 @@ def button_released_handler():
     recording = False  # Stop recording when the button is released
 
     print("Saving the recorded audio to a file...")
-    wavio.write(path + '/wave_to_send.wav', wave_to_send, fs, sampwidth=2)  # Save as WAV file
+    # Save as WAV file
+    with wave.open(path + '/wave_to_send.wav', 'w') as wav_file:
+        wav_file.setnchannels(1)
+        wav_file.setsampwidth(2)  # 16-bit sample width
+        wav_file.setframerate(fs)
+        wav_file.writeframes(wave_to_send.tobytes())
     os.system('aplay ' + path + '/wave_to_send.wav')
     print("Played the recorded audio...")
 
