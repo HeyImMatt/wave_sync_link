@@ -3,7 +3,7 @@ from gpiozero import Button
 from signal import pause
 import sounddevice as sd
 import os
-from scipy.io.wavfile import write
+import wavio
 
 # Make sure that the 'waves' folder exists, and if it does not, create it
 
@@ -30,7 +30,7 @@ def button_held_handler():
     sd.wait()  # Wait until recording is finished
 
 def button_released_handler():
-    write('wave_to_send.wav', fs, wave_to_send)  # Save as WAV file
+    wavio.write('wave_to_send.wav', wave_to_send, fs, sampwidth=2)  # Save as WAV file
     os.system('aplay ' + path + '/wave_to_send.wav')
 
 # Setup button functions - Pin 27 = Button hold time 10 seconds.
