@@ -4,6 +4,7 @@ from signal import pause
 import sounddevice as sd
 import os
 import wavio
+import numpy as np
 
 # Make sure that the 'waves' folder exists, and if it does not, create it
 
@@ -20,7 +21,7 @@ if not isExist:
 
 fs = 44100  # Sample rate
 # seconds = 3  # Duration of recording
-wave_to_send = []
+wave_to_send = np.array([])
 
 sd.default.samplerate = fs
 sd.default.channels = 1
