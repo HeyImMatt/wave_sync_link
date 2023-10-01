@@ -43,7 +43,7 @@ def button_held_handler():
         sd.wait()
 
 def button_released_handler():
-    wavio.write('wave_to_send.wav', wave_to_send, fs, sampwidth=2)  # Save as WAV file
+    wavio.write(path + '/wave_to_send.wav', wave_to_send, fs, sampwidth=2)  # Save as WAV file
     os.system('aplay ' + path + '/wave_to_send.wav')
 
 # Setup button functions - Pin 27 = Button hold time 10 seconds.
