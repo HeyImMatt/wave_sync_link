@@ -7,14 +7,14 @@ from scipy.io.wavfile import write
 
 # Make sure that the 'waves' folder exists, and if it does not, create it
 
-path = '/home/pi/wave_sync_link/waves'
+path = os.path.expanduser('~') + '/waves'
 
 isExist = os.path.exists(path)
 
 if not isExist:
     os.makedirs(path)
     print("The new directory is created!")
-    os.system('chmod 777 -R /home/pi/wave_sync_link/waves')
+    os.system(f'chmod 777 -R {path}')
 
 # Setup the record function
 
