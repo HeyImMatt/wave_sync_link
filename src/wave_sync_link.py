@@ -23,7 +23,7 @@ fs = 44100  # Sample rate
 wave_to_send = np.array([])
 
 sd.default.samplerate = fs
-sd.default.channels = 1
+sd.default.channels = 2
 sd.default.device = 'hw:1,0'
 
 def callback(indata, frames, time, status):
@@ -39,7 +39,7 @@ def button_held_handler():
     wave_to_send = np.array([])
 
     # Continue recording and appending to the array as long as the button is held
-    with sd.InputStream(samplerate=fs, channels=1, dtype='int16', callback=callback):
+    with sd.InputStream(samplerate=fs, channels=2, dtype='int16', callback=callback):
         print("Recording... Press and hold the button to continue recording.")
         sd.wait()
 
