@@ -50,7 +50,7 @@ def button_held_handler():
             
             while frames_recorded < frames_to_record:
                 # Read from the input stream
-                frames_available = stream.readinto(buffer[frames_recorded:])
+                frames_available = stream.read(buffer[frames_recorded:])
                 frames_recorded += frames_available
                 
             # Write the recorded data to the wave file
