@@ -30,7 +30,7 @@ duration = 5  # Recording duration in seconds
 
 sd.default.samplerate = fs
 sd.default.channels = 2
-sd.default.device = 'hw:1,0'
+# sd.default.device = 'hw:1,0'
 
 def write_wav_file(data, sample_rate, filename):
     with wave.open(filename, 'w') as wav_file:
