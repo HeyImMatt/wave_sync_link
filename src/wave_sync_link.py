@@ -40,7 +40,7 @@ def write_wav_file(data, sample_rate, filename):
 
 def button_pressed_handler():
     print(f"Recording for {duration} seconds... Release the button to stop recording.")
-    wave_to_send = sd.rec(int(duration * fs))
+    wave_to_send = sd.rec(int(duration * fs / 2))
     sd.wait()  # Wait until recording is finished
 
     print("Recording stopped. Writing to file.")
