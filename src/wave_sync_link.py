@@ -17,6 +17,11 @@ if not isExist:
     print("The new directory is created!")
     os.system(f'chmod 777 -R {path}')
 
+# Check if the user has write access to the directory
+if not os.access(path, os.W_OK):
+    print(f"Error: No write access to the directory '{path}'. Please check permissions.")
+    exit()
+
 # Setup the record function
 
 fs = 44100  # Sample rate
