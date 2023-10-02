@@ -4,7 +4,7 @@ from signal import pause
 import sounddevice as sd
 import os
 import wave
-import numpy as np
+# import numpy as np
 
 # Make sure that the 'waves' folder exists, and if it does not, create it
 
@@ -27,37 +27,23 @@ sd.default.samplerate = fs
 sd.default.channels = 2
 sd.default.device = 'hw:1,0'
 
-# def write_wav_file(data, sample_rate, filename):
-#     with wave.open(filename, 'w') as wav_file:
-#         wav_file.setnchannels(2)
-#         wav_file.setsampwidth(2)  # 16-bit sample width
-#         wav_file.setframerate(sample_rate)
-#         wav_file.writeframes(data.tobytes())
-
-def button_held_handler():
-    print(f"Recording for {duration} seconds... Release the button to stop recording.")
-    # Open a wave file for writing
-    with wave.open(os.path.join(path, 'wave_to_send.wav'), 'w') as wav_file:
+def write_wav_file(data, sample_rate, filename):
+    with wave.open(filename, 'w') as wav_file:
         wav_file.setnchannels(2)
         wav_file.setsampwidth(2)  # 16-bit sample width
-        wav_file.setframerate(fs)
-        
-        # Create an input stream
-        with sd.InputStream(samplerate=fs, channels=2, dtype='int16') as stream:
-            frames_to_record = int(duration * fs)
-            frames_recorded = 0
-            buffer = np.empty((frames_to_record, 2), dtype=np.int16)
-            
-            while frames_recorded < frames_to_record:
-                # Read from the input stream
-                frames_available = stream.read(buffer[frames_recorded:])
-                frames_recorded += frames_available
-                
-            # Write the recorded data to the wave file
-            wav_file.writeframes(buffer.tobytes())
-    
-    print("Recording stopped. Playing sound.")
+        wav_file.setframerate(sample_rate)
+        wav_file.writeframes(data.tobytes())
+
+def button_pressed_handler():
+    print(f"Recording for {duration} seconds... Release the button to stop recording.")
+    wave_to_send = sd.rec(int(duration * fs), blocking=True)
+
+    print("Recording stopped. Writing to file.")
+    write_wav_file(wave_to_send, fs, os.path.join(path, 'wave_to_send.wav'))
+
+    print("Writing complete. Playing sound.")
     os.system('aplay ' + os.path.join(path, 'wave_to_send.wav'))
+
     print("Playback complete.")
 
 # def button_released_handler():
@@ -69,7 +55,7 @@ def button_held_handler():
 # Setup button functions - Pin 27
 
 button = Button(27)
-button.when_held = button_held_handler
+button.when_pressed = button_pressed_handler
 # button.when_held = button_held_handler
 # button.when_released = button_released_handler
 
