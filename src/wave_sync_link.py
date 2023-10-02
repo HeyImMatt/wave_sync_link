@@ -25,35 +25,26 @@ wave_to_send = np.array([])
 sd.default.samplerate = fs
 sd.default.channels = 1
 
-# Flag to indicate whether recording is in progress
-recording = False
+def callback(indata, frames, time, status):
+    global wave_to_send
+    if status:
+        print(f"Error in callback: {status}")
+    # Append the recorded audio data to the array
+    wave_to_send = np.append(wave_to_send, indata)
 
 def button_held_handler():
-    global recording, wave_to_send
+    global wave_to_send
+    # Clear the existing audio data
+    wave_to_send = np.array([])
 
-    # If recording is not in progress, start recording
-    if not recording:
+    # Continue recording and appending to the array as long as the button is held
+    with sd.InputStream(samplerate=fs, channels=1, dtype='int16', callback=callback):
         print("Recording... Press and hold the button to continue recording.")
-        recording = True
-
-        # Clear the existing audio data
-        wave_to_send = np.array([])
-
-        # Start recording in a loop until the button is released
-        while recording:
-            indata, overflowed = sd.rec(int(fs), samplerate=fs, channels=1, dtype='int16', blocking=True)
-            wave_to_send = np.append(wave_to_send, indata)
-
-        print("Recording stopped.")
+        sd.wait()
 
 def button_released_handler():
-    global recording
-    recording = False  # Stop recording when the button is released
-
-    print("Saving the recorded audio to a file...")
     wavio.write(path + '/wave_to_send.wav', wave_to_send, fs, sampwidth=2)  # Save as WAV file
     os.system('aplay ' + path + '/wave_to_send.wav')
-    print("Played the recorded audio...")
 
 # Setup button functions - Pin 27 = Button hold time 10 seconds.
 
