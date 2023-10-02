@@ -24,6 +24,7 @@ wave_to_send = np.array([])
 
 sd.default.samplerate = fs
 sd.default.channels = 1
+sd.default.device = 'hw:1,0'
 
 def callback(indata, frames, time, status):
     global wave_to_send
