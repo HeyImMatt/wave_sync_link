@@ -27,21 +27,37 @@ sd.default.samplerate = fs
 sd.default.channels = 2
 sd.default.device = 'hw:1,0'
 
-def write_wav_file(data, sample_rate, filename):
-    with wave.open(filename, 'w') as wav_file:
-        wav_file.setnchannels(2)
-        wav_file.setsampwidth(2)  # 16-bit sample width
-        wav_file.setframerate(sample_rate)
-        wav_file.writeframes(data.tobytes())
+# def write_wav_file(data, sample_rate, filename):
+#     with wave.open(filename, 'w') as wav_file:
+#         wav_file.setnchannels(2)
+#         wav_file.setsampwidth(2)  # 16-bit sample width
+#         wav_file.setframerate(sample_rate)
+#         wav_file.writeframes(data.tobytes())
 
 def button_held_handler():
     print(f"Recording for {duration} seconds... Release the button to stop recording.")
-    wave_to_send = sd.rec(int(duration * fs), samplerate=fs, channels=2, dtype='int16')
-    sd.wait()  # Wait until recording is finished
-
-    print("Recording stopped. Writing to file and playing sound.")
-    write_wav_file(wave_to_send, fs, path + '/wave_to_send.wav')
-    os.system('aplay ' + path + '/wave_to_send.wav')
+    # Open a wave file for writing
+    with wave.open(os.path.join(path, 'wave_to_send.wav'), 'w') as wav_file:
+        wav_file.setnchannels(2)
+        wav_file.setsampwidth(2)  # 16-bit sample width
+        wav_file.setframerate(fs)
+        
+        # Create an input stream
+        with sd.InputStream(samplerate=fs, channels=2, dtype='int16') as stream:
+            frames_to_record = int(duration * fs)
+            frames_recorded = 0
+            buffer = np.empty((frames_to_record, 2), dtype=np.int16)
+            
+            while frames_recorded < frames_to_record:
+                # Read from the input stream
+                frames_available = stream.readinto(buffer[frames_recorded:])
+                frames_recorded += frames_available
+                
+            # Write the recorded data to the wave file
+            wav_file.writeframes(buffer.tobytes())
+    
+    print("Recording stopped. Playing sound.")
+    os.system('aplay ' + os.path.join(path, 'wave_to_send.wav'))
     print("Playback complete.")
 
 # def button_released_handler():
