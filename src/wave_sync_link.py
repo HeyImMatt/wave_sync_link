@@ -29,18 +29,19 @@ duration = 5  # Recording duration in seconds
 # wave_to_send = np.array([])
 
 sd.default.samplerate = fs
-sd.default.channels = 1
+sd.default.channels = 2
 
 def write_wav_file(data, sample_rate, filename):
     with wave.open(filename, 'w') as wav_file:
-        wav_file.setnchannels(1)
+        wav_file.setnchannels(2)
         wav_file.setsampwidth(2)  # 16-bit sample width
         wav_file.setframerate(sample_rate)
         wav_file.writeframes(data.tobytes())
 
 def button_pressed_handler():
     print(f"Recording for {duration} seconds... Release the button to stop recording.")
-    wave_to_send = sd.rec(int(duration * fs), blocking=True)
+    wave_to_send = sd.rec(int(duration * fs))
+    sd.wait()  # Wait until recording is finished
 
     print("Recording stopped. Writing to file.")
     write_wav_file(wave_to_send, fs, os.path.join(path, 'wave_to_send.wav'))
