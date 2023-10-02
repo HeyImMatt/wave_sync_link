@@ -30,8 +30,8 @@ def callback(indata, frames, time, status):
     global wave_to_send
     if status:
         print(f"Error in callback: {status}")
-    # Append the recorded audio data to the array
-    wave_to_send = np.append(wave_to_send, indata)
+    # Assign data to the buffer using indexing
+    wave_to_send[:] = indata
 
 def button_held_handler():
     global wave_to_send
