@@ -34,7 +34,7 @@ def write_wav_file(data, sample_rate, filename):
         wav_file.setframerate(sample_rate)
         wav_file.writeframes(data.tobytes())
 
-def button_pressed_handler():
+def button_held_handler():
     print(f"Recording for {duration} seconds... Release the button to stop recording.")
     wave_to_send = sd.rec(int(duration * fs), samplerate=fs, channels=2, dtype='int16')
     sd.wait()  # Wait until recording is finished
@@ -53,7 +53,7 @@ def button_pressed_handler():
 # Setup button functions - Pin 27
 
 button = Button(27)
-button.when_pressed = button_pressed_handler
+button.when_held = button_held_handler
 # button.when_held = button_held_handler
 # button.when_released = button_released_handler
 
