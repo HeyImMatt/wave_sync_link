@@ -40,13 +40,15 @@ def button_held_handler():
     # Continue recording and appending to the array as long as the button is held
     with sd.InputStream(samplerate=fs, channels=1, dtype='int16', callback=callback):
         print("Recording... Press and hold the button to continue recording.")
-        # sd.wait()
+        sd.wait()
 
 def button_released_handler():
+    print("Recording stopped. Writing to file and playing sound.")
     wavio.write(path + '/wave_to_send.wav', wave_to_send, fs, sampwidth=2)  # Save as WAV file
     os.system('aplay ' + path + '/wave_to_send.wav')
+    print("Playback complete.")
 
-# Setup button functions - Pin 27 = Button hold time 10 seconds.
+# Setup button functions - Pin 27
 
 button = Button(27)
 button.when_held = button_held_handler
