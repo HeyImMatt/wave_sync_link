@@ -32,9 +32,7 @@ def record_audio(indata, frames, time, status):
     if status:
         print(f"Error in callback: {status}")
 
-    # Convert indata to a copy using array
-    indata_copy = array.array('h', indata)
-    wave_to_send = indata_copy.copy()
+    wave_to_send = indata.copydata()
 
 def play_audio():
     print("Playing sound.")
