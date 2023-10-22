@@ -51,9 +51,8 @@ def button_pressed_handler():
     stream = sd.RawInputStream(callback=record_audio, channels=1, samplerate=fs)
     stream.start()
     
-    # Capture audio while the button is pressed
-    while button.is_pressed:
-        pass
+    # Wait for the button to be released
+    button.wait_for_release()
 
     stream.stop()
     stream.close()
@@ -65,5 +64,7 @@ def button_pressed_handler():
         play_audio()
 
 button.when_pressed = button_pressed_handler
+
+print("Wave Sync Link initialized")
 
 pause()
