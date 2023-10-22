@@ -52,7 +52,7 @@ def button_pressed_handler():
     stream.start()
     
     # Wait for the button to be released
-    button.wait_for_release()
+    button.wait_for_release(5)
 
     stream.stop()
     stream.close()
