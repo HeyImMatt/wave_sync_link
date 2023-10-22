@@ -44,8 +44,16 @@ def button_pressed_handler():
     print("Button held. Recording audio.")
     global wave_to_send
     wave_to_send = None  # Initialize the variable
-    with sd.RawInputStream(callback=record_audio, channels=1, samplerate=fs):
-        button.wait_for_release(15)  # Wait until the button is released
+    stream = sd.RawInputStream(callback=record_audio, channels=1, samplerate=fs)
+    stream.start()
+    
+    # Capture audio while the button is pressed
+    while button.is_pressed:
+        pass
+
+    stream.stop()
+    stream.close()
+
     if wave_to_send is not None:
         print("Recording stopped. Writing to file.")
         sf.write(os.path.join(path, 'wave_to_send.wav'), wave_to_send, fs)
