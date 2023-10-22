@@ -29,7 +29,7 @@ duration = 5  # Recording duration in seconds
 # wave_to_send = np.array([])
 
 sd.default.samplerate = fs
-sd.default.channels = 1
+# sd.default.channels = 1
 
 def write_wav_file(data, sample_rate, filename):
     with wave.open(filename, 'w') as wav_file:
