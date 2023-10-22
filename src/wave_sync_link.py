@@ -2,9 +2,8 @@
 from gpiozero import Button
 from signal import pause
 import sounddevice as sd
+import soundfile as sf
 import os
-import wave
-import array
 
 # Make sure that the 'waves' folder exists, and if it does not, create it
 
@@ -33,17 +32,6 @@ duration = 5  # Recording duration in seconds
 
 sd.default.samplerate = fs
 sd.default.channels = 1
-sd.default.dtype = 'int16'
-
-def write_wav_file(data, sample_rate, filename):
-    with wave.open(filename, 'w') as wav_file:
-        wav_file.setnchannels(1)
-        wav_file.setsampwidth(2)  # 16-bit sample width
-        wav_file.setframerate(sample_rate)
-
-        # Convert data to a byte array and write to the WAV file
-        byte_data = array.array('h', data)  # 'h' represents signed short (16-bit)
-        wav_file.writeframes(byte_data.tobytes())
 
 def button_pressed_handler():
     print(f"Recording for {duration} seconds... Release the button to stop recording.")
@@ -51,7 +39,7 @@ def button_pressed_handler():
     sd.wait()  # Wait until recording is finished
 
     print("Recording stopped. Writing to file.")
-    write_wav_file(wave_to_send, fs, os.path.join(path, 'wave_to_send.wav'))
+    sf.write(os.path.join(path, 'wave_to_send.wav'), wave_to_send, fs)
 
     print("Writing complete. Playing sound.")
     os.system('aplay ' + os.path.join(path, 'wave_to_send.wav'))
