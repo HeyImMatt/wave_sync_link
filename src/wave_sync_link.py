@@ -40,7 +40,8 @@ def play_audio():
 # Setup button functions - Pin 27
 button = Button(27)
 
-def button_held_handler():
+def button_pressed_handler():
+    print("Button held. Recording audio.")
     global wave_to_send
     wave_to_send = None  # Initialize the variable
     with sd.InputStream(callback=record_audio, channels=1, samplerate=fs):
@@ -51,6 +52,6 @@ def button_held_handler():
         print("Writing complete.")
         play_audio()
 
-button.when_held = button_held_handler
+button.when_pressed = button_pressed_handler
 
 pause()
