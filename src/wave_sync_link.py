@@ -32,7 +32,9 @@ def record_audio(indata, frames, time, status):
     if status:
         print(f"Error in callback: {status}")
 
-    wave_to_send = indata.copydata()
+    # Convert memoryview to bytes and create an array
+    byte_data = bytes(indata)
+    wave_to_send = array.array('h', byte_data)  # 'h' represents signed short (16-bit)
 
 def play_audio():
     print("Playing sound.")
