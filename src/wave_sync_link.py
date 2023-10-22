@@ -4,6 +4,7 @@ from signal import pause
 import sounddevice as sd
 import soundfile as sf
 import os
+import array
 
 # Make sure that the 'waves' folder exists, and if it does not, create it
 
@@ -31,8 +32,8 @@ def record_audio(indata, frames, time, status):
     if status:
         print(f"Error in callback: {status}")
 
-    # Convert indata to a copy using memoryview
-    indata_copy = memoryview(indata).cast('h')
+    # Convert indata to a copy using array
+    indata_copy = array.array('h', indata)
     wave_to_send = indata_copy.copy()
 
 def play_audio():
