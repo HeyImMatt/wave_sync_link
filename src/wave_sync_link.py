@@ -46,8 +46,8 @@ def button_pressed_handler():
 
     print("Playback complete.")
 
-def button_released_handler():
-    print("Button Released.")
+# def button_released_handler():
+#     print("Button Released.")
 #     wavio.write(path + '/wave_to_send.wav', wave_to_send, fs, sampwidth=2)  # Save as WAV file
 #     os.system('aplay ' + path + '/wave_to_send.wav')
 #     print("Playback complete.")
@@ -57,6 +57,6 @@ def button_released_handler():
 button = Button(27)
 button.when_pressed = button_pressed_handler
 # button.when_held = button_held_handler
-button.when_released = button_released_handler
+# button.when_released = button_released_handler
 
 pause()
