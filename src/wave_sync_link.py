@@ -26,37 +26,31 @@ if not os.access(path, os.W_OK):
 fs = 44100  # Sample rate
 duration = 5  # Recording duration in seconds
 
-# LOA: Obviously the fuzzed up audio, but also it seems like not holding the
-# button down the whole time causes it to crash. Short term may need to add 
-# a handler for release so it doesn't crap out.
+def record_audio(indata, frames, time, status):
+    global wave_to_send
+    if status:
+        print(f"Error in callback: {status}")
+    wave_to_send = indata.copy()
 
-sd.default.samplerate = fs
-sd.default.channels = 1
-
-def button_pressed_handler():
-    print(f"Recording for {duration} seconds... Release the button to stop recording.")
-    wave_to_send = sd.rec(int(duration * fs))
-    sd.wait()  # Wait until recording is finished
-
-    print("Recording stopped. Writing to file.")
-    sf.write(os.path.join(path, 'wave_to_send.wav'), wave_to_send, fs)
-
-    print("Writing complete. Playing sound.")
+def play_audio():
+    print("Playing sound.")
     os.system('aplay ' + os.path.join(path, 'wave_to_send.wav'))
-
     print("Playback complete.")
 
-# def button_released_handler():
-#     print("Button Released.")
-#     wavio.write(path + '/wave_to_send.wav', wave_to_send, fs, sampwidth=2)  # Save as WAV file
-#     os.system('aplay ' + path + '/wave_to_send.wav')
-#     print("Playback complete.")
-
 # Setup button functions - Pin 27
-
 button = Button(27)
-button.when_pressed = button_pressed_handler
-# button.when_held = button_held_handler
-# button.when_released = button_released_handler
+
+def button_held_handler():
+    global wave_to_send
+    wave_to_send = None  # Initialize the variable
+    with sd.InputStream(callback=record_audio, channels=1, samplerate=fs):
+        button.wait_for_release()  # Wait until the button is released
+    if wave_to_send is not None:
+        print("Recording stopped. Writing to file.")
+        sf.write(os.path.join(path, 'wave_to_send.wav'), wave_to_send, fs)
+        print("Writing complete.")
+        play_audio()
+
+button.when_held = button_held_handler
 
 pause()
