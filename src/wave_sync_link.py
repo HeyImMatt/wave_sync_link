@@ -2,9 +2,9 @@
 from gpiozero import Button
 from signal import pause
 import sounddevice as sd
+import soundfile as sf
 import os
-import wave
-import array
+import numpy as np
 
 # Make sure that the 'waves' folder exists, and if it does not, create it
 
@@ -25,50 +25,51 @@ if not os.access(path, os.W_OK):
 # Setup the record function
 
 fs = 44100  # Sample rate
-duration = 5  # Recording duration in seconds
+wave_to_send = np.array([], dtype=np.int16)  # Initialize the variable
+recording = False
+stream = None  # Declare stream as a global variable
 
-# LOA: Obviously the fuzzed up audio, but also it seems like not holding the
-# button down the whole time causes it to crash. Short term may need to add 
-# a handler for release so it doesn't crap out.
+def record_audio(indata, frames, time, status):
+    global wave_to_send
+    if status:
+        print(f"Error in callback: {status}")
 
-sd.default.samplerate = fs
-sd.default.channels = 1
-sd.default.dtype = 'int16'
+    if recording:
+        # Append the new data to the array
+        wave_to_send = np.append(wave_to_send, indata.copy())
 
-def write_wav_file(data, sample_rate, filename):
-    with wave.open(filename, 'w') as wav_file:
-        wav_file.setnchannels(1)
-        wav_file.setsampwidth(2)  # 16-bit sample width
-        wav_file.setframerate(sample_rate)
-
-        # Convert data to a byte array and write to the WAV file
-        byte_data = array.array('h', data)  # 'h' represents signed short (16-bit)
-        wav_file.writeframes(byte_data.tobytes())
-
-def button_pressed_handler():
-    print(f"Recording for {duration} seconds... Release the button to stop recording.")
-    wave_to_send = sd.rec(int(duration * fs))
-    sd.wait()  # Wait until recording is finished
-
-    print("Recording stopped. Writing to file.")
-    write_wav_file(wave_to_send, fs, os.path.join(path, 'wave_to_send.wav'))
-
-    print("Writing complete. Playing sound.")
+def play_audio():
+    print("Playing sound.")
     os.system('aplay ' + os.path.join(path, 'wave_to_send.wav'))
-
     print("Playback complete.")
 
-def button_released_handler():
-    print("Button Released.")
-#     wavio.write(path + '/wave_to_send.wav', wave_to_send, fs, sampwidth=2)  # Save as WAV file
-#     os.system('aplay ' + path + '/wave_to_send.wav')
-#     print("Playback complete.")
-
 # Setup button functions - Pin 27
-
 button = Button(27)
+
+def button_pressed_handler():
+    print("Button held. Recording audio.")
+    global wave_to_send, recording, stream
+    wave_to_send = np.array([], dtype=np.int16)  # Reset the variable
+    recording = True
+    stream = sd.InputStream(callback=record_audio, channels=1, samplerate=fs)
+    stream.start()
+
+def button_released_handler():
+    global recording, stream
+    if recording:
+        recording = False
+    stream.stop()
+    stream.close()
+
+    if len(wave_to_send) > 0:
+        print("Recording stopped. Writing to file.")
+        sf.write(os.path.join(path, 'wave_to_send.wav'), wave_to_send, fs)
+        print("Writing complete.")
+        play_audio()
+
 button.when_pressed = button_pressed_handler
-# button.when_held = button_held_handler
 button.when_released = button_released_handler
+
+print("Wave Sync Link initialized")
 
 pause()
