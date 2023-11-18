@@ -4,7 +4,7 @@ from signal import pause
 import sounddevice as sd
 import soundfile as sf
 import os
-import array
+import numpy as np
 
 # Make sure that the 'waves' folder exists, and if it does not, create it
 
@@ -26,16 +26,15 @@ if not os.access(path, os.W_OK):
 
 fs = 44100  # Sample rate
 duration = 5  # Recording duration in seconds
-wave_to_send = array.array('h')  # Initialize the variable
+wave_to_send = np.array([], dtype=np.int16)  # Initialize the variable
 
 def record_audio(indata, frames, time, status):
     global wave_to_send
     if status:
         print(f"Error in callback: {status}")
 
-    # Convert memoryview to bytes and create an array
-    byte_data = bytes(indata)
-    wave_to_send = array.array('h', byte_data)  # 'h' represents signed short (16-bit)
+    # Append the new data to the array
+    wave_to_send = np.append(wave_to_send, indata)
 
 def play_audio():
     print("Playing sound.")
@@ -48,12 +47,11 @@ button = Button(27)
 def button_pressed_handler():
     print("Button held. Recording audio.")
     global wave_to_send
-    wave_to_send = array.array('h')  # Reset the variable
-    stream = sd.RawInputStream(callback=record_audio, channels=1, samplerate=fs)
+    wave_to_send = np.array([], dtype=np.int16)  # Reset the variable
+    stream = sd.InputStream(callback=record_audio, channels=1, samplerate=fs)
     stream.start()
     
     # Wait for the button to be released
-    # button.wait_for_release(5)
     while button.is_pressed:
         pass
 
