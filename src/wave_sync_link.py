@@ -26,7 +26,7 @@ if not os.access(path, os.W_OK):
 
 fs = 44100  # Sample rate
 duration = 5  # Recording duration in seconds
-wave_to_send = None  # Initialize the variable
+wave_to_send = array.array('h')  # Initialize the variable
 
 def record_audio(indata, frames, time, status):
     global wave_to_send
@@ -48,17 +48,19 @@ button = Button(27)
 def button_pressed_handler():
     print("Button held. Recording audio.")
     global wave_to_send
-    wave_to_send = None  # Reset the variable
+    wave_to_send = array.array('h')  # Reset the variable
     stream = sd.RawInputStream(callback=record_audio, channels=1, samplerate=fs)
     stream.start()
     
     # Wait for the button to be released
-    button.wait_for_release(5)
+    # button.wait_for_release(5)
+    while button.is_pressed:
+        pass
 
     stream.stop()
     stream.close()
 
-    if wave_to_send is not None:
+    if len(wave_to_send) > 0:
         print("Recording stopped. Writing to file.")
         sf.write(os.path.join(path, 'wave_to_send.wav'), wave_to_send, fs)
         print("Writing complete.")
