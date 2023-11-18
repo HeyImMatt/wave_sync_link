@@ -26,7 +26,6 @@ if not os.access(path, os.W_OK):
 # Setup the record function
 
 fs = 44100  # Sample rate
-duration = 5  # Recording duration in seconds
 wave_to_send = np.array([], dtype=np.int16)  # Initialize the variable
 
 def record_audio(indata, frames, time, status):
@@ -35,7 +34,7 @@ def record_audio(indata, frames, time, status):
         print(f"Error in callback: {status}")
 
     # Append the new data to the array
-    wave_to_send = np.append(wave_to_send, indata)
+    wave_to_send = np.append(wave_to_send, indata.copy())
 
 def play_audio():
     print("Playing sound.")
