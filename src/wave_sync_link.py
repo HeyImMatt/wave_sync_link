@@ -27,14 +27,17 @@ if not os.access(path, os.W_OK):
 
 fs = 44100  # Sample rate
 wave_to_send = np.array([], dtype=np.int16)  # Initialize the variable
+recording = False
+stream = None  # Declare stream as a global variable
 
 def record_audio(indata, frames, time, status):
     global wave_to_send
     if status:
         print(f"Error in callback: {status}")
 
-    # Append the new data to the array
-    wave_to_send = np.append(wave_to_send, indata.copy())
+    if recording:
+        # Append the new data to the array
+        wave_to_send = np.append(wave_to_send, indata.copy())
 
 def play_audio():
     print("Playing sound.")
@@ -46,20 +49,25 @@ button = Button(27)
 
 def button_pressed_handler():
     print("Button held. Recording audio.")
-    global wave_to_send
+    global wave_to_send, recording, stream
     wave_to_send = np.array([], dtype=np.int16)  # Reset the variable
+    recording = True
     stream = sd.InputStream(callback=record_audio, channels=1, samplerate=fs)
     stream.start()
     
     # Capture audio while the button is pressed
-    start_time = datetime.now()
-    timeout = timedelta(seconds=10)  # Adjust the timeout as needed
+    # start_time = datetime.now()
+    # timeout = timedelta(seconds=10)  # Adjust the timeout as needed
 
-    while (datetime.now() - start_time) < timeout:
-        if not button.is_pressed:
-            break
+    # while (datetime.now() - start_time) < timeout:
+    #     if not button.is_pressed:
+    #         break
 
 
+def button_released_handler():
+    global recording, stream
+    if recording:
+        recording = False
     stream.stop()
     stream.close()
 
@@ -70,6 +78,7 @@ def button_pressed_handler():
         play_audio()
 
 button.when_pressed = button_pressed_handler
+button.when_released = button_released_handler
 
 print("Wave Sync Link initialized")
 
