@@ -5,7 +5,6 @@ import sounddevice as sd
 import soundfile as sf
 import os
 import numpy as np
-from datetime import datetime, timedelta
 
 # Make sure that the 'waves' folder exists, and if it does not, create it
 
@@ -54,15 +53,6 @@ def button_pressed_handler():
     recording = True
     stream = sd.InputStream(callback=record_audio, channels=1, samplerate=fs)
     stream.start()
-    
-    # Capture audio while the button is pressed
-    # start_time = datetime.now()
-    # timeout = timedelta(seconds=10)  # Adjust the timeout as needed
-
-    # while (datetime.now() - start_time) < timeout:
-    #     if not button.is_pressed:
-    #         break
-
 
 def button_released_handler():
     global recording, stream
