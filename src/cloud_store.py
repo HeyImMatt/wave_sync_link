@@ -47,6 +47,7 @@ def subscribe_to_topic(wave_received_handler):
 
     # Create a new thread for the message listener
     listener_thread = threading.Thread(target=message_listener)
+    listener_thread.daemon = True  # Set the thread as a daemon thread
 
     # Start the listener thread
     listener_thread.start()
