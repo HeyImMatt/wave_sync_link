@@ -4,6 +4,7 @@ import firebase_admin
 from firebase_admin import credentials, storage
 from google.cloud import pubsub_v1
 import time
+import threading
 
 from env_vars import HOME_PATH, FIREBASE_KEY_PATH, STORAGE_BUCKET, PROJECT_NAME, SUBSCRIPTION_NAME, SENDER_NAME, UPLOAD_PATH
 
@@ -36,14 +37,22 @@ def subscribe_to_topic(wave_received_handler):
 
     subscriber.subscribe(subscription_path, callback=callback)
 
-    # The subscriber is non-blocking, so we must keep the main thread from
-    # exiting to allow it to process messages in the background.
-    print(f"Listening for messages on {subscription_path}")
-    while True:
-        try:
-            time.sleep(5)
-        except KeyboardInterrupt:
-            break
+    def message_listener():
+        print(f"Listening for messages on {subscription_path}")
+        while True:
+            try:
+                time.sleep(5)
+            except KeyboardInterrupt:
+                break
+
+    # Create a new thread for the message listener
+    listener_thread = threading.Thread(target=message_listener)
+
+    # Start the listener thread
+    listener_thread.start()
+
+    # Wait for the listener thread to finish (optional)
+    # listener_thread.join()
 
 def upload_wave(wave_to_send_name):
     bucket.blob(f'from-{SENDER_NAME}/{wave_to_send_name}').upload_from_filename(f'{HOME_PATH}/{UPLOAD_PATH}/{wave_to_send_name}')
