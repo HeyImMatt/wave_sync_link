@@ -21,7 +21,7 @@ bucket = storage.bucket(name=STORAGE_BUCKET, app=app)
 def subscribe_to_topic(wave_received_handler):
     subscriber = pubsub_v1.SubscriberClient.from_service_account_file(f'{HOME_PATH}/{FIREBASE_KEY_PATH}')
     subscription_path = subscriber.subscription_path(
-        project = PROJECT_NAME, subscription_name = SUBSCRIPTION_NAME
+        project = PROJECT_NAME, subscription = SUBSCRIPTION_NAME
     )
 
     def callback(message):
