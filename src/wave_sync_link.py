@@ -60,19 +60,19 @@ def play_audio():
     print("Playback complete.")
 
 # Setup buttons
-red_button = Button(26)
+red_button = Button(27)
 green_button = Button(5)
 
 # Setup LEDs
 # I flubbed the wiring so off is on and on is off hence the 1.0 initial value
-# red_led = PWMLED(pin=13, initial_value=1.0) 
+red_led = PWMLED(pin=13, initial_value=1.0) 
 green_led = PWMLED(pin=12, initial_value=1.0)
 
 def button_pressed_handler():
     global wave_to_send, recording, stream
     print("Button held. Recording audio.")
     os.system('aplay ' + '../sounds/begin-message.wav')
-    # red_led.off() # Remember, off is on
+    red_led.off() # Remember, off is on
     wave_to_send = np.array([], dtype=np.int16)  # Reset the variable
     recording = True
     stream = sd.InputStream(callback=record_audio, channels=1, samplerate=fs, clip_off=True) # TODO Verify if this fixes problem with chopping off begin/end
@@ -84,7 +84,7 @@ def button_released_handler():
         recording = False
     stream.stop()
     stream.close()
-    # red_led.on() # Remember, on is off
+    red_led.on() # Remember, on is off
 
     if len(wave_to_send) > 0:
         red_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
@@ -97,7 +97,7 @@ def button_released_handler():
         play_audio()
         upload_wave(wave_to_send_name)
         os.system('aplay ' + '../sounds/message-sent.wav')
-        # red_led.on() # Remember, on is off
+        red_led.on() # Remember, on is off
 
 red_button.when_pressed = button_pressed_handler
 red_button.when_released = button_released_handler
