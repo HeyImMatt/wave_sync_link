@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from gpiozero import Button
+from gpiozero import Button, PWMLED
 from signal import pause
 import sounddevice as sd
 import soundfile as sf
@@ -62,6 +62,9 @@ def play_audio():
 # Setup button functions - Pin 27
 button = Button(27)
 
+green_button = Button(5)
+green_led = PWMLED(pin=12, initial_value=1.0) # I flubbed the wiring so off is on and on is off. D'oh.
+
 def button_pressed_handler():
     print("Button held. Recording audio.")
     global wave_to_send, recording, stream
@@ -90,8 +93,33 @@ button.when_released = button_released_handler
 
 def wave_received_handler(wave_received_blob, blob_path):
     wave_received_blob.download_to_filename(f'{path}/{blob_path}')
-    # TODO Pulse button LED and wait for button input to play
-    os.system('aplay ' + os.path.join(path, blob_path))
+    green_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
+    # os.system('aplay ' + os.path.join(path, blob_path))
+
+def play_received_waves():
+    received_path = os.path.join(path, receiver_path)
+    green_led.off() # Remember, off is on
+    # Get a list of all files in the directory
+    files = [f for f in os.listdir(os.path.join(received_path)) if os.path.isfile(os.path.join(received_path, f))]
+
+    if not files:
+        print("No files found in the directory.")
+        green_led.on() # Remember, on is off
+        return
+    
+    # TODO Update so if there's more than one, we prompt to play again or play nex
+    # Once we've gone through all of them, we move them to an archived folder.
+    # Then update so if there's nothing new, we go to the archived, and play those back
+    # starting with the most recent and prompt to play again, play next, or do nothing to exit.
+
+    # Find the most recent .wav file
+    most_recent_wav = max(files, key=lambda f: os.path.getmtime(os.path.join(received_path, f)))
+    # Play the most recent .wav file
+    wav_file_path = os.path.join(received_path, most_recent_wav)
+    os.system('aplay ' + wav_file_path)
+    green_led.on() # Remember, on is off
+
+green_button.when_pressed = play_received_waves
 
 subscribe_to_topic(wave_received_handler)
 
