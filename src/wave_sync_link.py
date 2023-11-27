@@ -63,7 +63,7 @@ def play_audio():
 button = Button(27)
 
 green_button = Button(5)
-green_led = PWMLED(pin=12, initial_value=1.0)
+green_led = PWMLED(pin=12, initial_value=1.0) # I flubbed the wiring so off is on and on is off. D'oh.
 
 def button_pressed_handler():
     print("Button held. Recording audio.")
@@ -98,13 +98,13 @@ def wave_received_handler(wave_received_blob, blob_path):
 
 def play_received_waves():
     received_path = os.path.join(path, receiver_path)
-    green_led.value = 0.0
+    green_led.off() # Remember, off is on
     # Get a list of all files in the directory
     files = [f for f in os.listdir(os.path.join(received_path)) if os.path.isfile(os.path.join(received_path, f))]
 
     if not files:
         print("No files found in the directory.")
-        green_led.value = 1.0
+        green_led.on() # Remember, on is off
         return
 
     # Find the most recent .wav file
@@ -112,7 +112,7 @@ def play_received_waves():
     # Play the most recent .wav file
     wav_file_path = os.path.join(received_path, most_recent_wav)
     os.system('aplay ' + wav_file_path)
-    green_led.value = 1.0
+    green_led.on() # Remember, on is off
 
 green_button.when_pressed = play_received_waves
 
