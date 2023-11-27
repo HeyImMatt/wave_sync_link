@@ -63,8 +63,7 @@ def play_audio():
 button = Button(27)
 
 green_button = Button(26)
-green_led = PWMLED(12)
-green_led.off()
+green_led = PWMLED(12, initial_value=0)
 
 def pulse_led(led):
     led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
@@ -102,11 +101,13 @@ def wave_received_handler(wave_received_blob, blob_path):
     # os.system('aplay ' + os.path.join(path, blob_path))
 
 def play_received_waves():
+    print('Green button pressed')
     green_led.on()
     # Get a list of all files in the directory
     files = [f for f in os.listdir(os.path.join(path, receiver_path)) if os.path.isfile(os.path.join(path, f))]
         # Find the most recent .wav file
     most_recent_wav = max(files, key=lambda f: os.path.getmtime(os.path.join(path, f)))
+    print(most_recent_wav)
     # Play the most recent .wav file
     wav_file_path = os.path.join(path, most_recent_wav)
     os.system('aplay ' + wav_file_path)
