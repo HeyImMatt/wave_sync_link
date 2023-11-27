@@ -59,18 +59,22 @@ def play_audio():
     os.system('aplay ' + os.path.join(sender_path, wave_to_send_name))
     print("Playback complete.")
 
-# Setup button functions - Pin 27
-button = Button(27)
-
+# Setup buttons
+red_button = Button(26)
 green_button = Button(5)
-green_led = PWMLED(pin=12, initial_value=1.0) # I flubbed the wiring so off is on and on is off. D'oh.
+
+# Setup LEDs
+low_brightness = 0.9 # TODO: Causes a flicker. Remove this after verifying it's possible to print play/record symbols on box
+red_led = PWMLED(pin=13, initial_value=low_brightness) 
+green_led = PWMLED(pin=12, initial_value=low_brightness)
 
 def button_pressed_handler():
-    print("Button held. Recording audio.")
     global wave_to_send, recording, stream
+    print("Button held. Recording audio.")
+    red_led.off() # Remember, off is on
     wave_to_send = np.array([], dtype=np.int16)  # Reset the variable
     recording = True
-    stream = sd.InputStream(callback=record_audio, channels=1, samplerate=fs)
+    stream = sd.InputStream(callback=record_audio, channels=1, samplerate=fs, clip_off=True) # TODO Verify if this fixes problem with chopping off begin/end
     stream.start()
 
 def button_released_handler():
@@ -79,22 +83,27 @@ def button_released_handler():
         recording = False
     stream.stop()
     stream.close()
+    red_led.value = low_brightness
 
     if len(wave_to_send) > 0:
+        red_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
         print("Recording stopped. Writing to file.")
         wave_to_send_name = f'wave-to-send-{int(time.time())}.wav'
         sf.write(os.path.join(sender_path, wave_to_send_name), wave_to_send, fs)
         print("Writing complete.")
+        #TODO Enter loop for feedback: Play message-recorded.wav, handle the button click once for playback,
+        # button click twice for send, and hold to re-record
         play_audio()
         upload_wave(wave_to_send_name)
+        os.system('aplay ' + '../sounds/message-sent.wav')
+        red_led.value = low_brightness
 
-button.when_pressed = button_pressed_handler
-button.when_released = button_released_handler
+red_button.when_pressed = button_pressed_handler
+red_button.when_released = button_released_handler
 
 def wave_received_handler(wave_received_blob, blob_path):
     wave_received_blob.download_to_filename(f'{path}/{blob_path}')
     green_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
-    # os.system('aplay ' + os.path.join(path, blob_path))
 
 def play_received_waves():
     received_path = os.path.join(path, receiver_path)
@@ -104,7 +113,7 @@ def play_received_waves():
 
     if not files:
         print("No files found in the directory.")
-        green_led.on() # Remember, on is off
+        green_led.value = low_brightness
         return
     
     # TODO Update so if there's more than one, we prompt to play again or play nex
@@ -117,7 +126,7 @@ def play_received_waves():
     # Play the most recent .wav file
     wav_file_path = os.path.join(received_path, most_recent_wav)
     os.system('aplay ' + wav_file_path)
-    green_led.on() # Remember, on is off
+    green_led.value = low_brightness
 
 green_button.when_pressed = play_received_waves
 
