@@ -71,11 +71,11 @@ green_led = PWMLED(pin=12, initial_value=1.0)
 def button_pressed_handler():
     global wave_to_send, recording, stream
     print("Button held. Recording audio.")
-    os.system('aplay ' + '../sounds/begin-message.wav')
+    # os.system('aplay ' + '../sounds/begin-message.wav')
     red_led.off() # Remember, off is on
     wave_to_send = np.array([], dtype=np.int16)  # Reset the variable
     recording = True
-    stream = sd.InputStream(callback=record_audio, channels=1, samplerate=fs, latency='high', clip_off=True) # TODO Verify if this fixes problem with chopping off begin/end
+    stream = sd.InputStream(callback=record_audio, channels=1, samplerate=fs, clip_off=True) # TODO Verify if this fixes problem with chopping off begin/end
     stream.start()
 
 def button_released_handler():
