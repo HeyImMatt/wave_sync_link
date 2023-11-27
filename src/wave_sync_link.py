@@ -64,8 +64,7 @@ red_button = Button(26)
 green_button = Button(5)
 
 # Setup LEDs
-# The LEDs work backwards, so this illuminates them 20% to start
-low_brightness = 0.95
+low_brightness = 0.9 # TODO: Causes a flicker. Remove this after verifying it's possible to print play/record symbols on box
 red_led = PWMLED(pin=13, initial_value=low_brightness) 
 green_led = PWMLED(pin=12, initial_value=low_brightness)
 
