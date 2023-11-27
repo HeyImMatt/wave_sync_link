@@ -64,6 +64,7 @@ button = Button(27)
 
 green_button = Button(26)
 green_led = PWMLED(12)
+green_led.off()
 
 def pulse_led(led):
     led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
