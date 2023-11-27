@@ -100,7 +100,14 @@ def play_received_waves():
     print('Green button pressed')
     green_led.on()
     # Get a list of all files in the directory
+    print(os.path.join(path, receiver_path))
     files = [f for f in os.listdir(os.path.join(path, receiver_path)) if os.path.isfile(os.path.join(path, f))]
+
+    if not files:
+        print("No files found in the directory.")
+        green_led.off()
+        return
+
     # Find the most recent .wav file
     most_recent_wav = max(files, key=lambda f: os.path.getmtime(os.path.join(path, f)))
     print(most_recent_wav)
