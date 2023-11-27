@@ -65,7 +65,7 @@ green_button = Button(5)
 
 # Setup LEDs
 # The LEDs work backwards, so this illuminates them 20% to start
-low_brightness = 0.8
+low_brightness = 0.93
 red_led = PWMLED(pin=13, initial_value=low_brightness) 
 green_led = PWMLED(pin=12, initial_value=low_brightness)
 
