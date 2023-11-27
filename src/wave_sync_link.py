@@ -63,7 +63,7 @@ def play_audio():
 button = Button(27)
 
 green_button = Button(5)
-green_led = PWMLED(12, initial_value=0)
+green_led = PWMLED(pin=12, initial_value=0.0)
 
 def button_pressed_handler():
     print("Button held. Recording audio.")
@@ -97,24 +97,25 @@ def wave_received_handler(wave_received_blob, blob_path):
     # os.system('aplay ' + os.path.join(path, blob_path))
 
 def play_received_waves():
+    received_path = os.path.join(path, receiver_path)
+    print(received_path)
     print('Green button pressed')
-    green_led.on()
+    green_led.value = 1.0
     # Get a list of all files in the directory
-    print(os.path.join(path, receiver_path))
-    files = [f for f in os.listdir(os.path.join(path, receiver_path)) if os.path.isfile(os.path.join(path, f))]
+    files = [f for f in os.listdir(os.path.join(received_path)) if os.path.isfile(os.path.join(received_path, f))]
 
     if not files:
         print("No files found in the directory.")
-        green_led.off()
+        green_led.value = 0.0
         return
 
     # Find the most recent .wav file
-    most_recent_wav = max(files, key=lambda f: os.path.getmtime(os.path.join(path, f)))
+    most_recent_wav = max(files, key=lambda f: os.path.getmtime(os.path.join(received_path, f)))
     print(most_recent_wav)
     # Play the most recent .wav file
-    wav_file_path = os.path.join(path, most_recent_wav)
+    wav_file_path = os.path.join(received_path, most_recent_wav)
     os.system('aplay ' + wav_file_path)
-    green_led.off()
+    green_led.value = 0.0
 
 green_button.when_pressed = play_received_waves
 
