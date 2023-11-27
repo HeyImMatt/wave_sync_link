@@ -6,6 +6,7 @@ import soundfile as sf
 import os
 import numpy as np
 import time
+import subprocess
 
 from cloud_store import upload_wave, subscribe_to_topic
 from env_vars import SENDER_NAME, RECEIVING_FROM_NAME
@@ -71,7 +72,7 @@ green_led = PWMLED(pin=12, initial_value=1.0)
 def button_pressed_handler():
     global wave_to_send, recording, stream
     print("Button held. Recording audio.")
-    # os.system('aplay ' + '../sounds/begin-message.wav')
+    subprocess.run(['aplay', '../sounds/begin-message.wav'])
     red_led.off() # Remember, off is on
     wave_to_send = np.array([], dtype=np.int16)  # Reset the variable
     recording = True
@@ -105,7 +106,6 @@ red_button.when_released = button_released_handler
 def wave_received_handler(wave_received_blob, blob_path):
     wave_received_blob.download_to_filename(f'{path}/{blob_path}')
     green_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
-    # os.system('aplay ' + os.path.join(path, blob_path))
 
 def play_received_waves():
     received_path = os.path.join(path, receiver_path)
