@@ -106,6 +106,11 @@ def play_received_waves():
         print("No files found in the directory.")
         green_led.on() # Remember, on is off
         return
+    
+    # TODO Update so if there's more than one, we prompt to play again or play nex
+    # Once we've gone through all of them, we move them to an archived folder.
+    # Then update so if there's nothing new, we go to the archived, and play those back
+    # starting with the most recent and prompt to play again, play next, or do nothing to exit.
 
     # Find the most recent .wav file
     most_recent_wav = max(files, key=lambda f: os.path.getmtime(os.path.join(received_path, f)))
