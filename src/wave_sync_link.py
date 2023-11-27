@@ -60,7 +60,7 @@ def play_audio():
     print("Playback complete.")
 
 # Setup buttons
-red_button = Button(27)
+red_button = Button(26)
 green_button = Button(5)
 
 # Setup LEDs
@@ -75,7 +75,7 @@ def button_pressed_handler():
     red_led.off() # Remember, off is on
     wave_to_send = np.array([], dtype=np.int16)  # Reset the variable
     recording = True
-    stream = sd.InputStream(callback=record_audio, channels=1, samplerate=fs, clip_off=True) # TODO Verify if this fixes problem with chopping off begin/end
+    stream = sd.InputStream(callback=record_audio, channels=1, samplerate=fs, latency='high', clip_off=True) # TODO Verify if this fixes problem with chopping off begin/end
     stream.start()
 
 def button_released_handler():
