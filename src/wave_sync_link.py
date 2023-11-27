@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from gpiozero import Button
+from gpiozero import Button, PWMLED
 from signal import pause
 import sounddevice as sd
 import soundfile as sf
@@ -62,6 +62,13 @@ def play_audio():
 # Setup button functions - Pin 27
 button = Button(27)
 
+green_button = Button(26)
+green_led = PWMLED(12)
+
+def pulse_led(led):
+    led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
+    time.sleep(2)  # Add a delay between pulses to make it more visible
+
 def button_pressed_handler():
     print("Button held. Recording audio.")
     global wave_to_send, recording, stream
@@ -90,8 +97,21 @@ button.when_released = button_released_handler
 
 def wave_received_handler(wave_received_blob, blob_path):
     wave_received_blob.download_to_filename(f'{path}/{blob_path}')
-    # TODO Pulse button LED and wait for button input to play
-    os.system('aplay ' + os.path.join(path, blob_path))
+    pulse_led(green_led)
+    # os.system('aplay ' + os.path.join(path, blob_path))
+
+def play_received_waves():
+    green_led.on()
+    # Get a list of all files in the directory
+    files = [f for f in os.listdir(os.path.join(path, receiver_path)) if os.path.isfile(os.path.join(path, f))]
+        # Find the most recent .wav file
+    most_recent_wav = max(files, key=lambda f: os.path.getmtime(os.path.join(path, f)))
+    # Play the most recent .wav file
+    wav_file_path = os.path.join(path, most_recent_wav)
+    os.system('aplay ' + wav_file_path)
+    green_led.off()
+
+green_button.when_pressed = play_received_waves
 
 subscribe_to_topic(wave_received_handler)
 
