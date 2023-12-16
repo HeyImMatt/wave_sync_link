@@ -86,29 +86,28 @@ def button_pressed_handler():
     red_button_press_count += 1
 
 def button_released_handler():
-    global recording, stream, wave_to_send_name
+    global recording, stream, wave_to_send, wave_to_send_name
     if recording:
         recording = False
         stream.stop()
         stream.close()
         red_led.value = low_brightness
-
-    if len(wave_to_send) > 0:
-        red_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
-        print("Recording stopped. Writing to file.")
-        wave_to_send_name = f'wave-to-send-{int(time.time())}.wav'
-        sf.write(os.path.join(sender_path, wave_to_send_name), wave_to_send, fs)
-        print("Writing complete.")
-        if red_button_press_count == 0:
+        if len(wave_to_send) > 0:
+            red_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
+            print("Recording stopped. Writing to file.")
+            wave_to_send_name = f'wave-to-send-{int(time.time())}.wav'
+            sf.write(os.path.join(sender_path, wave_to_send_name), wave_to_send, fs)
+            print("Writing complete.")
             os.system('aplay ' + '../sounds/message-recorded.wav')
-        if red_button_press_count == 1:
-            play_audio()
-        if red_button_press_count == 2:
-            upload_wave(wave_to_send_name)
-            os.system('aplay ' + '../sounds/message-sent.wav')
-            red_led.value = low_brightness
-            red_button_press_count = 0
-            wave_to_send = np.array([], dtype=np.int16)  # Reset the variable
+
+    if red_button_press_count == 1:
+        play_audio()
+    if red_button_press_count == 2:
+        upload_wave(wave_to_send_name)
+        os.system('aplay ' + '../sounds/message-sent.wav')
+        red_led.value = low_brightness
+        red_button_press_count = 0
+        wave_to_send = np.array([], dtype=np.int16)  # Reset the variable
 
 red_button.when_held = when_held_handler
 red_button.when_pressed = button_pressed_handler
