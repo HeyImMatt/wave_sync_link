@@ -60,7 +60,8 @@ def play_audio():
     print("Playback complete.")
 
 # Setup buttons
-red_button = Button(26)
+red_button = Button(pin=26, hold_time=3)
+red_button_press_count = 0
 green_button = Button(5)
 
 # Setup LEDs
@@ -68,22 +69,29 @@ low_brightness = 0.9 # TODO: Causes a flicker. Remove this after verifying it's 
 red_led = PWMLED(pin=13, initial_value=low_brightness) 
 green_led = PWMLED(pin=12, initial_value=low_brightness)
 
-def button_pressed_handler():
-    global wave_to_send, recording, stream
+def when_held_handler():
+    global wave_to_send, recording, red_button_press_count, stream
+    red_button_press_count = 0
     print("Button held. Recording audio.")
     red_led.off() # Remember, off is on
+    os.system('aplay ' + '../sounds/begin-message.wav')
     wave_to_send = np.array([], dtype=np.int16)  # Reset the variable
     recording = True
     stream = sd.InputStream(callback=record_audio, channels=1, samplerate=fs, clip_off=True) # TODO Verify if this fixes problem with chopping off begin/end
     stream.start()
 
+def button_pressed_handler():
+    global red_button_press_count
+    print(f'Button pressed. Press count: {red_button_press_count}')
+    red_button_press_count += 1
+
 def button_released_handler():
     global recording, stream, wave_to_send_name
     if recording:
         recording = False
-    stream.stop()
-    stream.close()
-    red_led.value = low_brightness
+        stream.stop()
+        stream.close()
+        red_led.value = low_brightness
 
     if len(wave_to_send) > 0:
         red_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
@@ -91,13 +99,18 @@ def button_released_handler():
         wave_to_send_name = f'wave-to-send-{int(time.time())}.wav'
         sf.write(os.path.join(sender_path, wave_to_send_name), wave_to_send, fs)
         print("Writing complete.")
-        #TODO Enter loop for feedback: Play message-recorded.wav, handle the button click once for playback,
-        # button click twice for send, and hold to re-record
-        play_audio()
-        upload_wave(wave_to_send_name)
-        os.system('aplay ' + '../sounds/message-sent.wav')
-        red_led.value = low_brightness
+        if red_button_press_count == 0:
+            os.system('aplay ' + '../sounds/message-recorded.wav')
+        if red_button_press_count == 1:
+            play_audio()
+        if red_button_press_count == 2:
+            upload_wave(wave_to_send_name)
+            os.system('aplay ' + '../sounds/message-sent.wav')
+            red_led.value = low_brightness
+            red_button_press_count = 0
+            wave_to_send = np.array([], dtype=np.int16)  # Reset the variable
 
+red_button.when_held = when_held_handler
 red_button.when_pressed = button_pressed_handler
 red_button.when_released = button_released_handler
 
