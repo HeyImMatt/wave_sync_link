@@ -6,6 +6,7 @@ import soundfile as sf
 import os
 import numpy as np
 import time
+import subprocess
 
 from cloud_store import upload_wave, subscribe_to_topic
 from env_vars import SENDER_NAME, RECEIVING_FROM_NAME
@@ -60,7 +61,7 @@ def play_audio():
     print("Playback complete.")
 
 # Setup buttons
-red_button = Button(pin=26, hold_time=3)
+red_button = Button(pin=26, hold_time=2)
 red_button_press_count = 0
 green_button = Button(5)
 
@@ -74,7 +75,10 @@ def when_held_handler():
     red_button_press_count = 0
     print("Button held. Recording audio.")
     red_led.off() # Remember, off is on
-    os.system('aplay ' + '../sounds/begin-message.wav')
+
+    # Using subprocess.call to wait for the 'aplay' command to finish
+    subprocess.call(['aplay', '../sounds/begin-message.wav'])
+
     wave_to_send = np.array([], dtype=np.int16)  # Reset the variable
     recording = True
     stream = sd.InputStream(callback=record_audio, channels=1, samplerate=fs, clip_off=True) # TODO Verify if this fixes problem with chopping off begin/end
