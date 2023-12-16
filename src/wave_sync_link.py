@@ -86,7 +86,7 @@ def button_pressed_handler():
     red_button_press_count += 1
 
 def button_released_handler():
-    global recording, stream, wave_to_send, wave_to_send_name
+    global recording, red_button_press_count, stream, wave_to_send, wave_to_send_name
     if recording:
         recording = False
         stream.stop()
