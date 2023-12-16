@@ -77,12 +77,13 @@ def when_held_handler():
     red_led.off() # Remember, off is on
 
     # Using subprocess.call to wait for the 'aplay' command to finish
-    subprocess.call(['aplay', '../sounds/begin-message.wav'])
+    # subprocess.call(['aplay', '../sounds/begin-message.wav'])
 
     wave_to_send = np.array([], dtype=np.int16)  # Reset the variable
     recording = True
     stream = sd.InputStream(callback=record_audio, channels=1, samplerate=fs, clip_off=True) # TODO Verify if this fixes problem with chopping off begin/end
     stream.start()
+    print("Start talking.")
 
 def button_pressed_handler():
     global red_button_press_count
