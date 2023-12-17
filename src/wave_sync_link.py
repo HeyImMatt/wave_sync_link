@@ -66,7 +66,7 @@ red_button_press_count = 0
 green_button = Button(5)
 
 # Setup LEDs
-low_brightness = 0.9 # TODO: Causes a flicker. Remove this after verifying it's possible to print play/record symbols on box
+low_brightness = 0.7
 red_led = PWMLED(pin=13, initial_value=low_brightness) 
 green_led = PWMLED(pin=12, initial_value=low_brightness)
 
@@ -78,6 +78,9 @@ def when_held_handler():
 
     # Using subprocess.run to wait for the 'aplay' command to finish
     subprocess.run(['aplay', '../sounds/begin-message.wav'])
+
+    # Introduce a delay to make sure the sound has finished playing
+    time.sleep(0.5)  # Adjust this delay as needed
 
     wave_to_send = np.array([], dtype=np.int16)  # Reset the variable
     recording = True
@@ -108,6 +111,10 @@ def button_released_handler():
     if red_button_press_count == 1:
         play_audio()
     if red_button_press_count == 2:
+        if (wave_to_send_name == None):
+            print("No wave to send.")
+            return
+
         upload_wave(wave_to_send_name)
         os.system('aplay ' + '../sounds/message-sent.wav')
         red_led.value = low_brightness
