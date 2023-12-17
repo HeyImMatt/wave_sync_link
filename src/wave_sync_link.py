@@ -76,8 +76,8 @@ def when_held_handler():
     print("Button held. Recording audio.")
     red_led.off() # Remember, off is on
 
-    # Using subprocess.call to wait for the 'aplay' command to finish
-    # subprocess.call(['aplay', '../sounds/begin-message.wav'])
+    # Using subprocess.run to wait for the 'aplay' command to finish
+    subprocess.run(['aplay', '../sounds/begin-message.wav'])
 
     wave_to_send = np.array([], dtype=np.int16)  # Reset the variable
     recording = True
@@ -112,6 +112,7 @@ def button_released_handler():
         os.system('aplay ' + '../sounds/message-sent.wav')
         red_led.value = low_brightness
         red_button_press_count = 0
+        wave_to_send_name = None
         wave_to_send = np.array([], dtype=np.int16)  # Reset the variable
 
 red_button.when_held = when_held_handler
