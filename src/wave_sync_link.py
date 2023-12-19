@@ -112,7 +112,7 @@ def red_button_released_handler():
     if len(wave_to_send) > 0:
         print("Playing back recorded message.")
         play_audio()
-        # play the message recorded sound
+        os.system('aplay ' + 'sounds/message-recorded.wav')
         return
 
 red_button.when_held = red_button_when_held_handler
@@ -121,6 +121,7 @@ red_button.when_released = red_button_released_handler
 def green_button_held_handler():
     global wave_to_send, wave_to_send_name
     if len(wave_to_send) > 0:
+        os.system('aplay ' + 'sounds/message-sending.wav')
         upload_wave(wave_to_send_name)
         os.system('aplay ' + 'sounds/message-sent.wav')
         red_led.value = low_brightness
