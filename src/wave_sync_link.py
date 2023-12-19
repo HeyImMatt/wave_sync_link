@@ -68,16 +68,6 @@ low_brightness = 0.9
 red_led = PWMLED(pin=13, initial_value=low_brightness) 
 green_led = PWMLED(pin=12, initial_value=low_brightness)
 
-# message recorded, press the red button to play it back, hold the green button to send, hold the red button to cancel
-# def red_button_pressed_handler():
-#     time.sleep(0.3)
-#     if len(wave_to_send) > 0:
-#         print("Playing back recorded message.")
-#         play_audio()
-#         red_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
-#         # play the message recorded sound
-#         return
-
 def red_button_when_held_handler():
     global sender_path, wave_to_send, wave_to_send_name, recording, stream
 
@@ -88,12 +78,13 @@ def red_button_when_held_handler():
         print("Send cancelled.")
         red_led.value = low_brightness
         green_led.value = low_brightness
-        # play the cancel sound
+        os.system('aplay ' + 'sounds/message-deleted.wav')
         return
 
     print("Button held. Recording audio.")
     wave_to_send = np.array([], dtype=np.int16)  # Reset the variable
     recording = True
+    # TODO add some try/catch around the stream start
     stream = sd.InputStream(callback=record_audio, channels=1, samplerate=fs, clip_off=True) # TODO Verify if this fixes problem with chopping off begin/end
     stream.start()
     print("Start talking.")
@@ -109,24 +100,22 @@ def red_button_released_handler():
         stream.close()
         red_led.value = low_brightness
         if len(wave_to_send) > 0:
-            red_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
             print("Recording stopped. Writing to file.")
+            red_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
+            green_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
             wave_to_send_name = f'wave-to-send-{int(time.time())}.wav'
             sf.write(os.path.join(sender_path, wave_to_send_name), wave_to_send, fs)
             print("Writing complete.")
-            green_led.off() # Remember, off is on
             os.system('aplay ' + 'sounds/message-recorded.wav')
             return
 
     if len(wave_to_send) > 0:
         print("Playing back recorded message.")
         play_audio()
-        red_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
         # play the message recorded sound
         return
 
 red_button.when_held = red_button_when_held_handler
-# red_button.when_pressed = red_button_pressed_handler
 red_button.when_released = red_button_released_handler
 
 def green_button_held_handler():
