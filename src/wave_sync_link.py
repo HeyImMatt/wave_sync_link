@@ -64,7 +64,7 @@ red_button = Button(pin=26, hold_time=2)
 green_button = Button(pin=5, hold_time=2)
 
 # Setup LEDs
-low_brightness = 0.85
+low_brightness = 0.9
 red_led = PWMLED(pin=13, initial_value=low_brightness) 
 green_led = PWMLED(pin=12, initial_value=low_brightness)
 
@@ -110,6 +110,7 @@ def red_button_released_handler():
             wave_to_send_name = f'wave-to-send-{int(time.time())}.wav'
             sf.write(os.path.join(sender_path, wave_to_send_name), wave_to_send, fs)
             print("Writing complete.")
+            green_led.off() # Remember, off is on
             os.system('aplay ' + 'sounds/message-recorded.wav')
             return
 
@@ -121,8 +122,9 @@ def green_button_held_handler():
     global wave_to_send, wave_to_send_name
     if len(wave_to_send) > 0:
         upload_wave(wave_to_send_name)
-        os.system('aplay ' + '/sounds/message-sent.wav')
+        os.system('aplay ' + 'sounds/message-sent.wav')
         red_led.value = low_brightness
+        green_led.value = low_brightness
         wave_to_send_name = None
         wave_to_send = np.array([], dtype=np.int16)
 
