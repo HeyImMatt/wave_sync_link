@@ -95,7 +95,7 @@ def button_released_handler():
         # button click twice for send, and hold to re-record
         play_audio()
         upload_wave(wave_to_send_name)
-        os.system('aplay ' + '../sounds/message-sent.wav')
+        os.system('aplay ' + '/sounds/message-sent.wav')
         red_led.value = low_brightness
 
 red_button.when_pressed = button_pressed_handler
