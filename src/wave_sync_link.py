@@ -64,7 +64,7 @@ red_button = Button(pin=26, hold_time=2)
 green_button = Button(pin=5, hold_time=2)
 
 # Setup LEDs
-low_brightness = 0.7
+low_brightness = 0.85
 red_led = PWMLED(pin=13, initial_value=low_brightness) 
 green_led = PWMLED(pin=12, initial_value=low_brightness)
 
@@ -74,6 +74,7 @@ def red_button_pressed_handler():
         print("Playing back recorded message.")
         play_audio()
         red_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
+        # play the message recorded sound
         return
 
 def red_button_when_held_handler():
@@ -109,7 +110,7 @@ def red_button_released_handler():
             wave_to_send_name = f'wave-to-send-{int(time.time())}.wav'
             sf.write(os.path.join(sender_path, wave_to_send_name), wave_to_send, fs)
             print("Writing complete.")
-            os.system('aplay ' + '../sounds/message-recorded.wav')
+            os.system('aplay ' + 'sounds/message-recorded.wav')
             return
 
 red_button.when_held = red_button_when_held_handler
@@ -117,6 +118,7 @@ red_button.when_pressed = red_button_pressed_handler
 red_button.when_released = red_button_released_handler
 
 def green_button_held_handler():
+    global wave_to_send, wave_to_send_name
     if len(wave_to_send) > 0:
         upload_wave(wave_to_send_name)
         os.system('aplay ' + '/sounds/message-sent.wav')
@@ -129,6 +131,10 @@ def wave_received_handler(wave_received_blob, blob_path):
     green_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
 
 def play_received_waves():
+    # Essentially yields to the held handler
+    if len(wave_to_send) > 0:
+        return
+
     received_path = os.path.join(path, receiver_path)
     green_led.off() # Remember, off is on
     # Get a list of all files in the directory
