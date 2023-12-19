@@ -70,6 +70,7 @@ green_led = PWMLED(pin=12, initial_value=low_brightness)
 
 # message recorded, press the red button to play it back, hold the green button to send, hold the red button to cancel
 def red_button_pressed_handler():
+    time.sleep(0.3)
     if len(wave_to_send) > 0:
         print("Playing back recorded message.")
         play_audio()
@@ -81,9 +82,9 @@ def red_button_when_held_handler():
     global sender_path, wave_to_send, wave_to_send_name, recording, stream
 
     if len(wave_to_send) > 0:
+        os.remove(os.path.join(sender_path, wave_to_send_name))
         wave_to_send_name = None
         wave_to_send = np.array([], dtype=np.int16)
-        os.remove(os.path.join(sender_path, wave_to_send_name))
         print("Send cancelled.")
         # play the cancel sound
         return
