@@ -69,14 +69,14 @@ red_led = PWMLED(pin=13, initial_value=low_brightness)
 green_led = PWMLED(pin=12, initial_value=low_brightness)
 
 # message recorded, press the red button to play it back, hold the green button to send, hold the red button to cancel
-def red_button_pressed_handler():
-    time.sleep(0.3)
-    if len(wave_to_send) > 0:
-        print("Playing back recorded message.")
-        play_audio()
-        red_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
-        # play the message recorded sound
-        return
+# def red_button_pressed_handler():
+#     time.sleep(0.3)
+#     if len(wave_to_send) > 0:
+#         print("Playing back recorded message.")
+#         play_audio()
+#         red_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
+#         # play the message recorded sound
+#         return
 
 def red_button_when_held_handler():
     global sender_path, wave_to_send, wave_to_send_name, recording, stream
@@ -86,6 +86,8 @@ def red_button_when_held_handler():
         wave_to_send_name = None
         wave_to_send = np.array([], dtype=np.int16)
         print("Send cancelled.")
+        red_led.value = low_brightness
+        green_led.value = low_brightness
         # play the cancel sound
         return
 
@@ -99,6 +101,7 @@ def red_button_when_held_handler():
 
 def red_button_released_handler():
     global recording, stream, wave_to_send, wave_to_send_name
+
     if recording:
         recording = False
         # TODO Add error handling in case of problems with the stream or record
@@ -115,8 +118,15 @@ def red_button_released_handler():
             os.system('aplay ' + 'sounds/message-recorded.wav')
             return
 
+    if len(wave_to_send) > 0:
+        print("Playing back recorded message.")
+        play_audio()
+        red_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
+        # play the message recorded sound
+        return
+
 red_button.when_held = red_button_when_held_handler
-red_button.when_pressed = red_button_pressed_handler
+# red_button.when_pressed = red_button_pressed_handler
 red_button.when_released = red_button_released_handler
 
 def green_button_held_handler():
