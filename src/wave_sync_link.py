@@ -61,34 +61,45 @@ def play_audio():
 
 # Setup buttons
 red_button = Button(pin=26, hold_time=2)
-red_button_press_count = 0
-green_button = Button(5)
+green_button = Button(pin=5, hold_time=2)
 
 # Setup LEDs
 low_brightness = 0.7
 red_led = PWMLED(pin=13, initial_value=low_brightness) 
 green_led = PWMLED(pin=12, initial_value=low_brightness)
 
-def when_held_handler():
-    global wave_to_send, recording, red_button_press_count, stream
-    red_button_press_count = 0
+# message recorded, press the red button to play it back, hold the green button to send, hold the red button to cancel
+def red_button_pressed_handler():
+    if len(wave_to_send) > 0:
+        print("Playing back recorded message.")
+        play_audio()
+        red_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
+        return
+
+def red_button_when_held_handler():
+    global wave_to_send, wave_to_send_name, recording, stream
+
+    if len(wave_to_send) > 0:
+        wave_to_send_name = None
+        wave_to_send = np.array([], dtype=np.int16)
+        os.remove(os.path.join(sender_path, wave_to_send_name))
+        print("Send cancelled.")
+        # play the cancel sound
+        return
+
     print("Button held. Recording audio.")
-    red_led.off() # Remember, off is on
     wave_to_send = np.array([], dtype=np.int16)  # Reset the variable
     recording = True
     stream = sd.InputStream(callback=record_audio, channels=1, samplerate=fs, clip_off=True) # TODO Verify if this fixes problem with chopping off begin/end
     stream.start()
     print("Start talking.")
+    red_led.off() # Remember, off is on
 
-def button_pressed_handler():
-    global red_button_press_count
-    print(f'Button pressed. Press count: {red_button_press_count}')
-    red_button_press_count += 1
-
-def button_released_handler():
-    global recording, red_button_press_count, stream, wave_to_send, wave_to_send_name
+def red_button_released_handler():
+    global recording, stream, wave_to_send, wave_to_send_name
     if recording:
         recording = False
+        # TODO Add error handling in case of problems with the stream or record
         stream.stop()
         stream.close()
         red_led.value = low_brightness
@@ -99,24 +110,19 @@ def button_released_handler():
             sf.write(os.path.join(sender_path, wave_to_send_name), wave_to_send, fs)
             print("Writing complete.")
             os.system('aplay ' + '../sounds/message-recorded.wav')
-
-    if red_button_press_count == 1:
-        play_audio()
-    if red_button_press_count == 2:
-        if (wave_to_send_name == None):
-            print("No wave to send.")
             return
 
+red_button.when_held = red_button_when_held_handler
+red_button.when_pressed = red_button_pressed_handler
+red_button.when_released = red_button_released_handler
+
+def green_button_held_handler():
+    if len(wave_to_send) > 0:
         upload_wave(wave_to_send_name)
         os.system('aplay ' + '/sounds/message-sent.wav')
         red_led.value = low_brightness
-        red_button_press_count = 0
         wave_to_send_name = None
-        wave_to_send = np.array([], dtype=np.int16)  # Reset the variable
-
-red_button.when_held = when_held_handler
-red_button.when_pressed = button_pressed_handler
-red_button.when_released = button_released_handler
+        wave_to_send = np.array([], dtype=np.int16)
 
 def wave_received_handler(wave_received_blob, blob_path):
     wave_received_blob.download_to_filename(f'{path}/{blob_path}')
@@ -146,6 +152,7 @@ def play_received_waves():
     green_led.value = low_brightness
 
 green_button.when_pressed = play_received_waves
+green_button.when_held = green_button_held_handler
 
 subscribe_to_topic(wave_received_handler)
 
