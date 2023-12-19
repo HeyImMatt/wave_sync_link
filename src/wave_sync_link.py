@@ -78,7 +78,7 @@ def red_button_pressed_handler():
         return
 
 def red_button_when_held_handler():
-    global wave_to_send, wave_to_send_name, recording, stream
+    global sender_path, wave_to_send, wave_to_send_name, recording, stream
 
     if len(wave_to_send) > 0:
         wave_to_send_name = None
