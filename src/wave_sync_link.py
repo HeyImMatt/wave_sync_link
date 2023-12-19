@@ -60,52 +60,84 @@ def play_audio():
     print("Playback complete.")
 
 # Setup buttons
-red_button = Button(26)
-green_button = Button(5)
+red_button = Button(pin=26, hold_time=2)
+green_button = Button(pin=5, hold_time=2)
 
 # Setup LEDs
-low_brightness = 0.9 # TODO: Causes a flicker. Remove this after verifying it's possible to print play/record symbols on box
+low_brightness = 0.9
 red_led = PWMLED(pin=13, initial_value=low_brightness) 
 green_led = PWMLED(pin=12, initial_value=low_brightness)
 
-def button_pressed_handler():
-    global wave_to_send, recording, stream
-    print("Button held. Recording audio.")
-    red_led.off() # Remember, off is on
-    wave_to_send = np.array([], dtype=np.int16)  # Reset the variable
-    recording = True
-    stream = sd.InputStream(callback=record_audio, channels=1, samplerate=fs, clip_off=True) # TODO Verify if this fixes problem with chopping off begin/end
-    stream.start()
-
-def button_released_handler():
-    global recording, stream, wave_to_send_name
-    if recording:
-        recording = False
-    stream.stop()
-    stream.close()
-    red_led.value = low_brightness
+def red_button_when_held_handler():
+    global sender_path, wave_to_send, wave_to_send_name, recording, stream
 
     if len(wave_to_send) > 0:
-        red_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
-        print("Recording stopped. Writing to file.")
-        wave_to_send_name = f'wave-to-send-{int(time.time())}.wav'
-        sf.write(os.path.join(sender_path, wave_to_send_name), wave_to_send, fs)
-        print("Writing complete.")
-        #TODO Enter loop for feedback: Play message-recorded.wav, handle the button click once for playback,
-        # button click twice for send, and hold to re-record
-        play_audio()
-        upload_wave(wave_to_send_name)
-        os.system('aplay ' + '/sounds/message-sent.wav')
+        os.remove(os.path.join(sender_path, wave_to_send_name))
+        wave_to_send_name = None
+        wave_to_send = np.array([], dtype=np.int16)
+        print("Send cancelled.")
         red_led.value = low_brightness
+        green_led.value = low_brightness
+        os.system('aplay ' + 'sounds/message-deleted.wav')
+        return
 
-red_button.when_pressed = button_pressed_handler
-red_button.when_released = button_released_handler
+    print("Button held. Recording audio.")
+    wave_to_send = np.array([], dtype=np.int16)  # Reset the variable
+    recording = True
+    # TODO add some try/catch around the stream start
+    stream = sd.InputStream(callback=record_audio, channels=1, samplerate=fs, clip_off=True) # TODO Verify if this fixes problem with chopping off begin/end
+    stream.start()
+    print("Start talking.")
+    red_led.off() # Remember, off is on
+
+def red_button_released_handler():
+    global recording, stream, wave_to_send, wave_to_send_name
+
+    if recording:
+        recording = False
+        # TODO Add error handling in case of problems with the stream or record
+        stream.stop()
+        stream.close()
+        red_led.value = low_brightness
+        if len(wave_to_send) > 0:
+            print("Recording stopped. Writing to file.")
+            red_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
+            green_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
+            wave_to_send_name = f'wave-to-send-{int(time.time())}.wav'
+            sf.write(os.path.join(sender_path, wave_to_send_name), wave_to_send, fs)
+            print("Writing complete.")
+            os.system('aplay ' + 'sounds/message-recorded.wav')
+            return
+
+    if len(wave_to_send) > 0:
+        print("Playing back recorded message.")
+        play_audio()
+        os.system('aplay ' + 'sounds/message-recorded.wav')
+        return
+
+red_button.when_held = red_button_when_held_handler
+red_button.when_released = red_button_released_handler
+
+def green_button_held_handler():
+    global wave_to_send, wave_to_send_name
+    if len(wave_to_send) > 0:
+        os.system('aplay ' + 'sounds/message-sending.wav')
+        upload_wave(wave_to_send_name)
+        os.system('aplay ' + 'sounds/message-sent.wav')
+        red_led.value = low_brightness
+        green_led.value = low_brightness
+        wave_to_send_name = None
+        wave_to_send = np.array([], dtype=np.int16)
 
 def wave_received_handler(wave_received_blob, blob_path):
     wave_received_blob.download_to_filename(f'{path}/{blob_path}')
     green_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
 
 def play_received_waves():
+    # Essentially yields to the held handler
+    if len(wave_to_send) > 0:
+        return
+
     received_path = os.path.join(path, receiver_path)
     green_led.off() # Remember, off is on
     # Get a list of all files in the directory
@@ -129,6 +161,7 @@ def play_received_waves():
     green_led.value = low_brightness
 
 green_button.when_pressed = play_received_waves
+green_button.when_held = green_button_held_handler
 
 subscribe_to_topic(wave_received_handler)
 

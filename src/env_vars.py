@@ -4,7 +4,6 @@ import os
 load_dotenv()
 
 HOME_PATH = os.path.expanduser("~")
-DOWNLOAD_PATH = os.environ.get("DOWNLOAD_PATH")
 UPLOAD_PATH = os.environ.get("UPLOAD_PATH")
 FIREBASE_KEY_PATH = os.environ.get("FIREBASE_KEY_PATH")
 STORAGE_BUCKET = os.environ.get("STORAGE_BUCKET")
