@@ -108,7 +108,7 @@ def button_released_handler():
             return
 
         upload_wave(wave_to_send_name)
-        os.system('aplay ' + '../sounds/message-sent.wav')
+        os.system('aplay ' + '/sounds/message-sent.wav')
         red_led.value = low_brightness
         red_button_press_count = 0
         wave_to_send_name = None
