@@ -6,7 +6,6 @@ import soundfile as sf
 import os
 import numpy as np
 import time
-import subprocess
 
 from cloud_store import upload_wave, subscribe_to_topic
 from env_vars import SENDER_NAME, RECEIVING_FROM_NAME
