@@ -181,6 +181,8 @@ def wave_received_handler(wave_received_blob, blob_path):
     green_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
 
 def green_button_released_handler():
+    global currently_playing_wave
+
     if currently_playing_wave:
         os.system('aplay ' + os.path.join(path, receiver_path, currently_playing_wave))
         os.system('aplay ' + 'sounds/message-played.wav')
