@@ -95,7 +95,7 @@ def red_button_when_held_handler():
         return
     
     if currently_playing_wave:
-        os.move(os.path.join(receiver_path, currently_playing_wave), os.path.join(archive_path, currently_playing_wave))
+        os.rename(os.path.join(receiver_path, currently_playing_wave), os.path.join(archive_path, currently_playing_wave))
         currently_playing_wave = None
         print("Message archived")
         red_led.value = low_brightness
@@ -161,7 +161,7 @@ def green_button_held_handler():
         return
 
     if currently_playing_wave:
-        os.move(os.path.join(receiver_path, currently_playing_wave), os.path.join(favorites_path, currently_playing_wave))
+        os.rename(os.path.join(receiver_path, currently_playing_wave), os.path.join(favorites_path, currently_playing_wave))
         print("Message added to favorites")
         os.system('aplay ' + 'sounds/message-added-to-favs.wav')
         currently_playing_wave = None
