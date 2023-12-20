@@ -100,9 +100,9 @@ def red_button_when_held_handler():
         print("Message archived")
         red_led.value = low_brightness
 
-        # Get a list of all files in the directory
+        # Check if there's more waves to play
         files = [f for f in os.listdir(os.path.join(receiver_path)) if os.path.isfile(os.path.join(receiver_path, f))]
-        if min(files, key=lambda f: os.path.getmtime(os.path.join(receiver_path, f))):
+        if files:
             green_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
         else: 
             green_led.value = low_brightness
