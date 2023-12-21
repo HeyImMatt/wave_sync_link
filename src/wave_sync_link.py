@@ -220,7 +220,7 @@ def green_button_pressed_handler():
         return
 
     # The released handler plays oldest wav and begins decision flow
-    currently_playing_wave = min(files, key=lambda f: os.path.getmtime(os.path.join(receiver_path, f)))
+    currently_playing_wave = min(waves, key=lambda f: os.path.getmtime(os.path.join(receiver_path, f)))
     pulse_green_led()
 
 green_button.when_pressed = green_button_pressed_handler
