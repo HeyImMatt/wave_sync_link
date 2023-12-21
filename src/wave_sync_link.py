@@ -53,7 +53,28 @@ if not os.access(path, os.W_OK):
 not_connected = True
 
 if not_connected:
-    run_in_offline_mode(favorites_path)
+        green_button = Button(pin=5)
+
+        # Setup LEDs
+        low_brightness = 0.9
+        green_led = PWMLED(pin=13, initial_value=low_brightness)
+
+        def play_random_favorite():
+            print('in fn setup')
+            try:
+                favorites = [f for f in os.listdir(favorites_path) if os.path.isfile(os.path.join(favorites_path, f))]
+                print('trying')
+                if favorites:
+                    green_led.off() # remember off is on
+                    random_favorite = np.random.choice(favorites)
+                    os.system('aplay ' + os.path.join(favorites_path, random_favorite))
+                    green_led.value = low_brightness
+                else:
+                    print("No favorites found.")
+            except Exception as e:
+                print(f"Error playing favorite: {e}")
+
+        green_button.when_pressed = play_random_favorite
 else:
     # Setup buttons
     red_button = Button(pin=26, hold_time=2)

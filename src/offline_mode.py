@@ -3,7 +3,7 @@ import os
 import numpy as np
 
 def run_in_offline_mode(favorites_path):
-    green_button = Button(5)
+    green_button = Button(pin=5)
 
     # Setup LEDs
     low_brightness = 0.9
