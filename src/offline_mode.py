@@ -7,7 +7,6 @@ def run_in_offline_mode(favorites_path):
 
     # Setup LEDs
     low_brightness = 0.9
-    red_led = PWMLED(pin=12, initial_value=1.0) # off 
     green_led = PWMLED(pin=13, initial_value=low_brightness)
 
     def play_random_favorite():
@@ -23,4 +22,4 @@ def run_in_offline_mode(favorites_path):
         except Exception as e:
             print(f"Error playing favorite: {e}")
 
-    green_button.when_pressed = play_random_favorite()
+    green_button.when_pressed = play_random_favorite
