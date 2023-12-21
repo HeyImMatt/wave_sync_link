@@ -186,8 +186,14 @@ def wave_received_handler(wave_received_blob, blob_path):
 def green_button_released_handler():
     global currently_playing_wave, green_button_was_held_for_currently_playing_wave
 
+    # Yield to the record flow
+    if len(wave_to_send) > 0:
+        return
+
     if currently_playing_wave and not green_button_was_held_for_currently_playing_wave:
+        green_led.off() # Remember, off is on
         os.system('aplay ' + os.path.join(path, receiver_path, currently_playing_wave))
+        green_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
         os.system('aplay ' + 'sounds/message-played.wav')
     
     if green_button_was_held_for_currently_playing_wave:
@@ -212,20 +218,10 @@ def green_button_pressed_handler():
         print("No files found in the directory.")
         green_led.value = low_brightness
         return
-    
-    # TODO Update so if there's more than one, we prompt to play again or play nex
-    # Once we've gone through all of them, we move them to an archived folder.
-    # Then update so if there's nothing new, we go to the archived, and play those back
-    # starting with the most recent and prompt to play again, play next, or do nothing to exit.
 
-    green_led.off() # Remember, off is on
-
-    # Play oldest wav and begin decision flow
+    # The released handler plays oldest wav and begins decision flow
     currently_playing_wave = min(files, key=lambda f: os.path.getmtime(os.path.join(receiver_path, f)))
-    wav_file_path = os.path.join(receiver_path, currently_playing_wave)
-    os.system('aplay ' + wav_file_path)
     green_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
-    os.system('aplay ' + 'sounds/message-played.wav')
 
 green_button.when_pressed = green_button_pressed_handler
 green_button.when_held = green_button_held_handler
