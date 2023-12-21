@@ -81,6 +81,12 @@ low_brightness = 0.9
 red_led = PWMLED(pin=12, initial_value=low_brightness) 
 green_led = PWMLED(pin=13, initial_value=low_brightness)
 
+def pulse_green_led():
+    green_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
+
+def get_received_waves():
+    return [f for f in os.listdir(os.path.join(receiver_path)) if os.path.isfile(os.path.join(receiver_path, f))]
+
 def red_button_when_held_handler():
     global sender_path, wave_to_send, wave_to_send_name, recording, stream, currently_playing_wave
 
@@ -101,9 +107,9 @@ def red_button_when_held_handler():
         red_led.value = low_brightness
 
         # Check if there's more waves to play
-        files = [f for f in os.listdir(os.path.join(receiver_path)) if os.path.isfile(os.path.join(receiver_path, f))]
-        if files:
-            green_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
+        waves = get_received_waves()
+        if waves:
+            pulse_green_led()
         else: 
             green_led.value = low_brightness
 
@@ -114,7 +120,7 @@ def red_button_when_held_handler():
     wave_to_send = np.array([], dtype=np.int16)  # Reset the variable
     recording = True
     # TODO add some try/catch around the stream start
-    stream = sd.InputStream(callback=record_audio, channels=1, samplerate=fs, clip_off=True) # TODO Verify if this fixes problem with chopping off begin/end
+    stream = sd.InputStream(callback=record_audio, channels=1, samplerate=fs, clip_off=True)
     stream.start()
     print("Start talking.")
     red_led.off() # Remember, off is on
@@ -131,7 +137,7 @@ def red_button_released_handler():
         if len(wave_to_send) > 0:
             print("Recording stopped. Writing to file.")
             red_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
-            green_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
+            pulse_green_led()
             wave_to_send_name = f'wave-to-send-{int(time.time())}.wav'
             sf.write(os.path.join(sender_path, wave_to_send_name), wave_to_send, fs)
             print("Writing complete.")
@@ -170,18 +176,13 @@ def green_button_held_handler():
         currently_playing_wave = None
         red_led.value = low_brightness
 
-        # Get a list of all files in the directory
-        files = [f for f in os.listdir(os.path.join(receiver_path)) if os.path.isfile(os.path.join(receiver_path, f))]
-        if files:
-            green_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
+        waves = get_received_waves()
+        if waves:
+            pulse_green_led()
         else: 
             green_led.value = low_brightness
 
         return
-
-def wave_received_handler(wave_received_blob, blob_path):
-    wave_received_blob.download_to_filename(f'{path}/{blob_path}')
-    green_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
 
 def green_button_released_handler():
     global currently_playing_wave, green_button_was_held_for_currently_playing_wave
@@ -193,7 +194,7 @@ def green_button_released_handler():
     if currently_playing_wave and not green_button_was_held_for_currently_playing_wave:
         green_led.off() # Remember, off is on
         os.system('aplay ' + os.path.join(path, receiver_path, currently_playing_wave))
-        green_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
+        pulse_green_led()
         os.system('aplay ' + 'sounds/message-played.wav')
     
     if green_button_was_held_for_currently_playing_wave:
@@ -211,23 +212,31 @@ def green_button_pressed_handler():
     if currently_playing_wave:
         return
 
-    # Get a list of all files in the directory
-    files = [f for f in os.listdir(os.path.join(receiver_path)) if os.path.isfile(os.path.join(receiver_path, f))]
+    waves = get_received_waves()
 
-    if not files:
+    if not waves:
         print("No files found in the directory.")
         green_led.value = low_brightness
         return
 
     # The released handler plays oldest wav and begins decision flow
-    currently_playing_wave = min(files, key=lambda f: os.path.getmtime(os.path.join(receiver_path, f)))
-    green_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
+    currently_playing_wave = min(waves, key=lambda f: os.path.getmtime(os.path.join(receiver_path, f)))
+    pulse_green_led()
 
 green_button.when_pressed = green_button_pressed_handler
 green_button.when_held = green_button_held_handler
 green_button.when_released = green_button_released_handler
 
+def wave_received_handler(wave_received_blob, blob_path):
+    wave_received_blob.download_to_filename(f'{path}/{blob_path}')
+    pulse_green_led()
+
 subscribe_to_topic(wave_received_handler)
+
+# Check for unplayed waves
+waves = [f for f in os.listdir(os.path.join(receiver_path)) if os.path.isfile(os.path.join(receiver_path, f))]
+if waves:
+    pulse_green_led()
 
 print("Wave Sync Link initialized")
 
