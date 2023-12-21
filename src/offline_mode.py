@@ -12,8 +12,10 @@ def run_in_offline_mode(favorites_path):
     print("Running in offline mode.")
 
     def play_random_favorite():
+        print('in fn setup')
         try:
             favorites = [f for f in os.listdir(favorites_path) if os.path.isfile(os.path.join(favorites_path, f))]
+            print('trying')
             if favorites:
                 green_led.off() # remember off is on
                 random_favorite = np.random.choice(favorites)
