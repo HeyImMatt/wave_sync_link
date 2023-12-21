@@ -147,8 +147,10 @@ def red_button_released_handler():
 red_button.when_held = red_button_when_held_handler
 red_button.when_released = red_button_released_handler
 
+green_button_was_held_for_currently_playing_wave = False
+
 def green_button_held_handler():
-    global currently_playing_wave, wave_to_send, wave_to_send_name
+    global currently_playing_wave, green_button_was_held_for_currently_playing_wave, wave_to_send, wave_to_send_name
     
     if len(wave_to_send) > 0:
         os.system('aplay ' + 'sounds/message-sending.wav')
@@ -166,6 +168,7 @@ def green_button_held_handler():
         os.system('aplay ' + 'sounds/message-added-to-favs.wav')
         currently_playing_wave = None
         red_led.value = low_brightness
+        green_button_was_held_for_currently_playing_wave = True
 
         # Get a list of all files in the directory
         files = [f for f in os.listdir(os.path.join(receiver_path)) if os.path.isfile(os.path.join(receiver_path, f))]
@@ -181,11 +184,14 @@ def wave_received_handler(wave_received_blob, blob_path):
     green_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
 
 def green_button_released_handler():
-    global currently_playing_wave
+    global currently_playing_wave, green_button_was_held_for_currently_playing_wave
 
-    if currently_playing_wave:
+    if currently_playing_wave and not green_button_was_held_for_currently_playing_wave:
         os.system('aplay ' + os.path.join(path, receiver_path, currently_playing_wave))
         os.system('aplay ' + 'sounds/message-played.wav')
+    
+    if green_button_was_held_for_currently_playing_wave:
+        green_button_was_held_for_currently_playing_wave = False
 
 
 def green_button_pressed_handler():
