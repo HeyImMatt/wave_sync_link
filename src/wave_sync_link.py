@@ -55,7 +55,6 @@ not_connected = True
 if not_connected:
     run_in_offline_mode(favorites_path)
 else:
-    print('here')
     # Setup buttons
     red_button = Button(pin=26, hold_time=2)
     green_button = Button(pin=5, hold_time=2)

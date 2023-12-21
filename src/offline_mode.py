@@ -9,6 +9,8 @@ def run_in_offline_mode(favorites_path):
     low_brightness = 0.9
     green_led = PWMLED(pin=13, initial_value=low_brightness)
 
+    print("Running in offline mode.")
+
     def play_random_favorite():
         try:
             favorites = [f for f in os.listdir(favorites_path) if os.path.isfile(os.path.join(favorites_path, f))]
@@ -21,5 +23,7 @@ def run_in_offline_mode(favorites_path):
                 print("No favorites found.")
         except Exception as e:
             print(f"Error playing favorite: {e}")
+        
+    print('after fn setup')
 
     green_button.when_pressed = play_random_favorite
