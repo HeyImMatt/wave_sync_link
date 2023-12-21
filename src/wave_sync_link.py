@@ -163,12 +163,12 @@ def green_button_held_handler():
         return
 
     if currently_playing_wave:
+        green_button_was_held_for_currently_playing_wave = True
         os.rename(os.path.join(receiver_path, currently_playing_wave), os.path.join(favorites_path, currently_playing_wave))
         print("Message added to favorites")
         os.system('aplay ' + 'sounds/message-added-to-favs.wav')
         currently_playing_wave = None
         red_led.value = low_brightness
-        green_button_was_held_for_currently_playing_wave = True
 
         # Get a list of all files in the directory
         files = [f for f in os.listdir(os.path.join(receiver_path)) if os.path.isfile(os.path.join(receiver_path, f))]
