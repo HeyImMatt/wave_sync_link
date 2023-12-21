@@ -78,8 +78,8 @@ green_button = Button(pin=5, hold_time=2)
 
 # Setup LEDs
 low_brightness = 0.9
-red_led = PWMLED(pin=13, initial_value=low_brightness) 
-green_led = PWMLED(pin=12, initial_value=low_brightness)
+red_led = PWMLED(pin=12, initial_value=low_brightness) 
+green_led = PWMLED(pin=13, initial_value=low_brightness)
 
 def red_button_when_held_handler():
     global sender_path, wave_to_send, wave_to_send_name, recording, stream, currently_playing_wave
