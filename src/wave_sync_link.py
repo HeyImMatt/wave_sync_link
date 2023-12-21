@@ -51,7 +51,6 @@ if not os.access(path, os.W_OK):
     exit()
 
 def play_random_favorite():
-    print('in fn setup')
     try:
         favorites = [f for f in os.listdir(favorites_path) if os.path.isfile(os.path.join(favorites_path, f))]
         print('trying')
@@ -69,8 +68,10 @@ def is_connected():
     try:
         # Ping Google's public DNS server to check for internet connectivity
         subprocess.check_call(['ping', '-c', '1', '8.8.8.8'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        print("Connected to the internet")
         return True
     except subprocess.CalledProcessError:
+        print("Not connected to the internet. Running in offline mode.")
         return False
 
 if not is_connected():
