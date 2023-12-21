@@ -6,10 +6,10 @@ import soundfile as sf
 import os
 import numpy as np
 import time
+import subprocess
 
 from cloud_store import upload_wave, subscribe_to_topic
 from env_vars import SENDER_NAME, RECEIVING_FROM_NAME
-from offline_mode import run_in_offline_mode
 
 # Make sure the folder structure exists, and if it does not, create it
 path = os.path.expanduser('~') + '/waves'
@@ -50,9 +50,15 @@ if not os.access(path, os.W_OK):
     print(f"Error: No write access to the directory '{path}'. Please check permissions.")
     exit()
 
-not_connected = True
+def is_connected():
+    try:
+        # Ping Google's public DNS server to check for internet connectivity
+        subprocess.check_call(['ping', '-c', '1', '8.8.8.8'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        return True
+    except subprocess.CalledProcessError:
+        return False
 
-if not_connected:
+if not is_connected():
         green_button = Button(pin=5)
 
         # Setup LEDs
