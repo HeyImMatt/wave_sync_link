@@ -50,6 +50,21 @@ if not os.access(path, os.W_OK):
     print(f"Error: No write access to the directory '{path}'. Please check permissions.")
     exit()
 
+def play_random_favorite():
+    print('in fn setup')
+    try:
+        favorites = [f for f in os.listdir(favorites_path) if os.path.isfile(os.path.join(favorites_path, f))]
+        print('trying')
+        if favorites:
+            green_led.off() # remember off is on
+            random_favorite = np.random.choice(favorites)
+            os.system('aplay ' + os.path.join(favorites_path, random_favorite))
+            green_led.value = low_brightness
+        else:
+            print("No favorites found.")
+    except Exception as e:
+        print(f"Error playing favorite: {e}")
+
 def is_connected():
     try:
         # Ping Google's public DNS server to check for internet connectivity
@@ -64,22 +79,6 @@ if not is_connected():
         # Setup LEDs
         low_brightness = 0.9
         green_led = PWMLED(pin=13, initial_value=low_brightness)
-
-        def play_random_favorite():
-            print('in fn setup')
-            try:
-                favorites = [f for f in os.listdir(favorites_path) if os.path.isfile(os.path.join(favorites_path, f))]
-                print('trying')
-                if favorites:
-                    green_led.off() # remember off is on
-                    random_favorite = np.random.choice(favorites)
-                    os.system('aplay ' + os.path.join(favorites_path, random_favorite))
-                    green_led.value = low_brightness
-                else:
-                    print("No favorites found.")
-            except Exception as e:
-                print(f"Error playing favorite: {e}")
-
         green_button.when_pressed = play_random_favorite
 else:
     # Setup buttons
@@ -246,8 +245,7 @@ else:
         waves = get_received_waves()
 
         if not waves:
-            print("No files found in the directory.")
-            green_led.value = low_brightness
+            play_random_favorite()
             return
 
         # The released handler plays oldest wav and begins decision flow
