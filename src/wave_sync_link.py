@@ -169,7 +169,7 @@ else:
                 print("Recording stopped. Writing to file.")
                 red_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
                 pulse_green_led()
-                wave_to_send_name = f'wave-to-send-{int(time.time())}.wav'
+                wave_to_send_name = f'{int(time.time())}.wav'
                 sf.write(os.path.join(sender_path, wave_to_send_name), wave_to_send, fs)
                 print("Writing complete.")
                 os.system('aplay ' + 'sounds/message-recorded.wav')
