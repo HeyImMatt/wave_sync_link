@@ -56,5 +56,8 @@ def subscribe_to_topic(wave_received_handler):
     # listener_thread.join()
 
 def upload_wave(wave_to_send_name):
-    bucket.blob(f'from-{SENDER_NAME}/{wave_to_send_name}').upload_from_filename(f'{HOME_PATH}/{UPLOAD_PATH}/{wave_to_send_name}')
-    print(f"File {wave_to_send_name} uploaded to /from-{SENDER_NAME}")
+    try:
+        bucket.blob(f'from-{SENDER_NAME}/{wave_to_send_name}').upload_from_filename(f'{HOME_PATH}/{UPLOAD_PATH}/{wave_to_send_name}')
+        print(f"File {wave_to_send_name} uploaded to /from-{SENDER_NAME}")
+    except Exception as e:
+        print(f"Error uploading {wave_to_send_name} to /from-{SENDER_NAME}: {e}")

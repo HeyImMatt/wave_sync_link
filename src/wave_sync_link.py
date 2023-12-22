@@ -53,7 +53,7 @@ if not os.access(path, os.W_OK):
 def play_random_favorite():
     try:
         favorites = [f for f in os.listdir(favorites_path) if os.path.isfile(os.path.join(favorites_path, f))]
-        print('trying')
+        print('Playing a favorite')
         if favorites:
             green_led.off() # remember off is on
             random_favorite = np.random.choice(favorites)
@@ -75,12 +75,12 @@ def is_connected():
         return False
 
 if not is_connected():
-        green_button = Button(pin=5)
+    green_button = Button(pin=5)
 
-        # Setup LEDs
-        low_brightness = 0.9
-        green_led = PWMLED(pin=13, initial_value=low_brightness)
-        green_button.when_pressed = play_random_favorite
+    # Setup LEDs
+    low_brightness = 0.9
+    green_led = PWMLED(pin=13, initial_value=low_brightness)
+    green_button.when_pressed = play_random_favorite
 else:
     # Setup buttons
     red_button = Button(pin=26, hold_time=2)
@@ -169,7 +169,7 @@ else:
                 print("Recording stopped. Writing to file.")
                 red_led.pulse(fade_in_time=1, fade_out_time=1, n=None, background=True)
                 pulse_green_led()
-                wave_to_send_name = f'wave-to-send-{int(time.time())}.wav'
+                wave_to_send_name = f'{int(time.time())}.wav'
                 sf.write(os.path.join(sender_path, wave_to_send_name), wave_to_send, fs)
                 print("Writing complete.")
                 os.system('aplay ' + 'sounds/message-recorded.wav')
@@ -258,8 +258,11 @@ else:
     green_button.when_released = green_button_released_handler
 
     def wave_received_handler(wave_received_blob, blob_path):
-        wave_received_blob.download_to_filename(f'{path}/{blob_path}')
-        pulse_green_led()
+        try: 
+            wave_received_blob.download_to_filename(f'{path}/{blob_path}')
+            pulse_green_led()
+        except Exception as e:
+            print(f"Error downloading wave: {e}")
 
     subscribe_to_topic(wave_received_handler)
 
