@@ -148,6 +148,12 @@ else:
             return
 
         print("Button held. Recording audio.")
+
+        # Play begin message sound
+        data, fs = sf.read('sounds/begin-message.wav')
+        sd.play(data, fs)
+        sd.wait()
+
         wave_to_send = np.array([], dtype=np.int16)  # Reset the variable
         recording = True
         # TODO add some try/catch around the stream start
