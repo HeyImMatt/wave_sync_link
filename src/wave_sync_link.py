@@ -119,7 +119,7 @@ else:
         return [f for f in os.listdir(os.path.join(receiver_path)) if os.path.isfile(os.path.join(receiver_path, f))]
 
     def red_button_when_held_handler():
-        global sender_path, wave_to_send, wave_to_send_name, recording, stream, currently_playing_wave
+        global sender_path, wave_to_send, wave_to_send_name, recording, stream, currently_playing_wave, green_button_was_held_for_currently_playing_wave
 
         if len(wave_to_send) > 0:
             os.remove(os.path.join(sender_path, wave_to_send_name))
@@ -134,6 +134,7 @@ else:
         if currently_playing_wave:
             os.rename(os.path.join(receiver_path, currently_playing_wave), os.path.join(archive_path, currently_playing_wave))
             currently_playing_wave = None
+            green_button_was_held_for_currently_playing_wave = False
             print("Message archived")
             red_led.value = low_brightness
 
@@ -227,6 +228,7 @@ else:
             os.system('aplay ' + os.path.join(path, receiver_path, currently_playing_wave))
             pulse_green_led()
             os.system('aplay ' + 'sounds/message-played.wav')
+            return
         
         if green_button_was_held_for_currently_playing_wave:
             green_button_was_held_for_currently_playing_wave = False
