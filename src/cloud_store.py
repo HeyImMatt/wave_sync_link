@@ -51,6 +51,7 @@ def subscribe_to_topic(wave_received_handler, on_connection_lost=None, on_connec
             try:
                 streaming_pull_future.result()
             except Exception as e:
+                #TODO: Doesn't seem to be excepting when the connection is lost
                 print(f"Streaming pull future errored: {e}")
                 streaming_pull_future.cancel()
 
