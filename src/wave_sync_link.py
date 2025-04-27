@@ -264,7 +264,21 @@ else:
         except Exception as e:
             print(f"Error downloading wave: {e}")
 
-    subscribe_to_topic(wave_received_handler)
+    def on_connection_lost():
+        print("Connection lost! Disabling red LED.")
+        red_led.on()  # LED OFF
+        red_led.value = 0  # ensure it's fully off
+        red_button.when_held = None
+        red_button.when_released = None
+
+    def on_connection_restored():
+        print("Connection restored! Re-enabling red LED.")
+        red_led.value = low_brightness
+        red_button.when_held = red_button_when_held_handler
+        red_button.when_released = red_button_released_handler
+
+
+    subscribe_to_topic(wave_received_handler, on_connection_lost=on_connection_lost, on_connection_restored=on_connection_restored)
 
     # Check for unplayed waves
     waves = [f for f in os.listdir(os.path.join(receiver_path)) if os.path.isfile(os.path.join(receiver_path, f))]
